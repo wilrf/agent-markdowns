@@ -1,6 +1,6 @@
 ---
 name: engine
-description: The autonomous build engine. Use when the user says "use the engine for this", "run the engine on …", "/engine", or asks for an autonomous / long-horizon build that should design its own checks and verify its own work before handing back. Given any task, you understand the intent, DESIGN A GATE that can prove it done (and can fail), get the human's sign-off on the target, then build and self-verify against that gate until green — stopping at a committed slice. Carries the full loop discipline inline (gate design, verify panel, fan-out, context budgeting, retro) so it is self-sufficient for multi-day runs.
+description: The autonomous build engine. Use when the user says "use the engine for this", "run the engine on …", "/engine", or asks for an autonomous / long-horizon build that should design its own checks and verify its own work before handing back. Also fires for designing or running ANY autonomous loop — "set up a loop", "run this overnight", "let it iterate until…", "fan out agents", "create a workflow to…", a maker/checker pair, worktree parallelism, or any task whose done-condition you intend to express as a machine-checkable condition. Given any task, you understand the intent, DESIGN A GATE that can prove it done (and can fail), get the human's sign-off on the target, then build and self-verify against that gate until green — stopping at a committed slice. Carries the full loop discipline inline (gate design, verify panel, fan-out, context budgeting, retro) so it is self-sufficient for multi-day runs; for the broader loop-design space (review / plan / infra modes, field notes, copy-paste station templates) it routes to its bundled playbook + templates.
 user-invocable: true
 ---
 
@@ -11,6 +11,21 @@ the intent → **design a gate that can prove it done and can fail** → get the
 yes on the target → build and self-verify against that gate until green → hand back a
 committed slice. This skill is **self-sufficient for long autonomous runs** — it carries
 the gate-design, verify-panel, fan-out, context-budgeting and retro discipline inline.
+
+**Deeper reference (bundled).** The build pipeline below is the fast path. For the broader
+loop-design space — the four modes (build / **review** / **plan** / **infra**), field notes
+from real runs, the build order, and copy-paste station skeletons — route to:
+- [`references/agent-loops-playbook.md`](references/agent-loops-playbook.md) — the accumulated
+  judgment (read it before designing a non-build loop, or any unusually large run).
+- [`templates/`](templates/) — copy-paste skeletons: `goal-template.md` (build stations) ·
+  `engine-template.md` (this engine, parameterized) · `review-template.md` · `planning-template.md`
+  · `infra-template.md`.
+
+**Quick gut-check before you loop:** (1) is there a command that can actually **fail**? no gate =
+no loop. (2) is "done" an exit code / checked artifact, not a vibe? (3) dynamic `Workflow` → did
+the user explicitly opt in? (4) is the iteration count **capped**? (5) does it respect the repo's
+HARD RULES (ports, push flags, prod env)? (6) will it outlive a context window → ledger on disk,
+`/compact` at phase boundaries. (7) does the goal include the **retro** before declaring done?
 
 **Bind to the active project first.** The engine is project-agnostic; its gate is not.
 Before designing anything, read the active repo's contract — `CLAUDE.md` / `AGENTS.md`,

@@ -1,12 +1,12 @@
 {
   "name": "engine",
-  "version": "1.0.0",
-  "description": "The autonomous build engine: given any task, designs a gate that can prove it done (and can fail), gets human sign-off on the target, then builds and self-verifies against that gate until green — stopping at a committed slice.",
+  "version": "1.1.0",
+  "description": "The autonomous build engine: given any task, designs a gate that can prove it done (and can fail), gets human sign-off on the target, then builds and self-verifies against that gate until green — stopping at a committed slice. Bundles the agent-loops playbook (build/review/plan/infra modes, field notes) and copy-paste station templates.",
   "author": {
     "name": "Doug Fowler",
     "email": "doug@thedanielgroup.com"
   },
   "repository": "https://github.com/wilrf/agent-markdowns",
   "license": "MIT",
-  "keywords": ["autonomous", "build-engine", "self-verifying", "gate-design", "long-horizon", "agent"]
+  "keywords": ["autonomous", "build-engine", "self-verifying", "gate-design", "long-horizon", "agent", "agent-loops", "verify-panel", "workflow", "playbook"]
 }

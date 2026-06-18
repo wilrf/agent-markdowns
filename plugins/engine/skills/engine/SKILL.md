@@ -161,6 +161,10 @@ isn't yet a gate.
   - **More looks**: iterate browser + coding passes until *your own* judgment says it
     looks good, then continue. No human pause. Taste isn't fully machine-checkable —
     conformance + visual passes shrink the residue; they don't erase it.
+  - **Spend to a bug budget, not to zero.** No surface is defect-free; the bar is that it
+    *feels* reliable and fast, not that it's perfect. Once the gate is green and the surface
+    looks right, stop — don't burn passes chasing the last cosmetic residue. Perfectionism on
+    the non-deterministic tail is its own failure mode.
 
 ## The adversarial verify panel
 

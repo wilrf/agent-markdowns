@@ -1,0 +1,12 @@
+{
+  "name": "planning",
+  "version": "1.0.0",
+  "description": "Planning mode for autonomous agents: the loop engine pointed at a spec/plan as the artifact. Grounding checks (every step touches things that exist), a premortem panel, every phase names its gate, simplify = fewest phases. Emits a machine-checkable plan that build mode (the engine) consumes. Companion to the agent-loops foundation.",
+  "author": {
+    "name": "Doug Fowler",
+    "email": "doug@thedanielgroup.com"
+  },
+  "repository": "https://github.com/wilrf/agent-markdowns",
+  "license": "MIT",
+  "keywords": ["planning", "spec", "design", "premortem", "grounding", "phased-work", "agent-loops"]
+}

@@ -1,6 +1,6 @@
 ---
 name: engine
-description: The autonomous build engine. Use when the user says "use the engine for this", "run the engine on …", "/engine", or asks for an autonomous / long-horizon build that should design its own checks and verify its own work before handing back. Also fires for designing or running ANY autonomous loop — "set up a loop", "run this overnight", "let it iterate until…", "fan out agents", "create a workflow to…", a maker/checker pair, worktree parallelism, or any task whose done-condition you intend to express as a machine-checkable condition. Given any task, you understand the intent, DESIGN A GATE that can prove it done (and can fail), get the human's sign-off on the target, then build and self-verify against that gate until green — stopping at a committed slice. Carries the full loop discipline inline (gate design, verify panel, fan-out, context budgeting, retro) so it is self-sufficient for multi-day runs; for the broader loop-design space (review / plan / infra modes, field notes, copy-paste station templates) it routes to its bundled playbook + templates.
+description: The autonomous build engine. Use when the user says "use the engine for this", "run the engine on …", "/engine", or asks for an autonomous / long-horizon build that should design its own checks and verify its own work before handing back. Also fires for designing or running ANY autonomous loop — "set up a loop", "run this overnight", "let it iterate until…", "fan out agents", "create a workflow to…", a maker/checker pair, worktree parallelism, or any task whose done-condition you intend to express as a machine-checkable condition. Given any task, you understand the intent, DESIGN A GATE that can prove it done (and can fail), get the human's sign-off on the target, then build and self-verify against that gate until green — stopping at a committed slice. Carries the full loop discipline inline (gate design, verify panel, fan-out, context budgeting, retro) so it is self-sufficient for multi-day build runs; for the broader loop-design space (review / plan / infra modes, the full playbook, station templates) install the companion `agent-loops` / `review` / `planning` / `infra` plugins in this marketplace.
 user-invocable: true
 ---
 
@@ -12,14 +12,17 @@ yes on the target → build and self-verify against that gate until green → ha
 committed slice. This skill is **self-sufficient for long autonomous runs** — it carries
 the gate-design, verify-panel, fan-out, context-budgeting and retro discipline inline.
 
-**Deeper reference (bundled).** The build pipeline below is the fast path. For the broader
-loop-design space — the four modes (build / **review** / **plan** / **infra**), field notes
-from real runs, the build order, and copy-paste station skeletons — route to:
-- [`references/agent-loops-playbook.md`](references/agent-loops-playbook.md) — the accumulated
-  judgment (read it before designing a non-build loop, or any unusually large run).
-- [`templates/`](templates/) — copy-paste skeletons: `goal-template.md` (build stations) ·
-  `engine-template.md` (this engine, parameterized) · `review-template.md` · `planning-template.md`
-  · `infra-template.md`.
+**Deeper reference (companion plugins).** The build pipeline below is the fast path and is
+self-sufficient for a build. For the broader loop-design space — the four modes (build /
+**review** / **plan** / **infra**), the full operating manual, field notes, and copy-paste
+station skeletons — install the companion plugins in this marketplace:
+- **`agent-loops`** — the foundation: the accumulated-judgment playbook (read it before
+  designing a non-build loop or any unusually large run) + the `goal-template` build-station
+  skeleton.
+- **`review`** / **`planning`** / **`infra`** — the non-build modes, each with its own
+  trigger and station template.
+- This plugin bundles [`templates/engine-template.md`](templates/engine-template.md) — the
+  engine parameterized for your repo.
 
 **Quick gut-check before you loop:** (1) is there a command that can actually **fail**? no gate =
 no loop. (2) is "done" an exit code / checked artifact, not a vibe? (3) dynamic `Workflow` → did

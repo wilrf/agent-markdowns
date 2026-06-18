@@ -1,7 +1,7 @@
 {
   "name": "engine",
-  "version": "1.1.0",
-  "description": "The autonomous build engine: given any task, designs a gate that can prove it done (and can fail), gets human sign-off on the target, then builds and self-verifies against that gate until green — stopping at a committed slice. Bundles the agent-loops playbook (build/review/plan/infra modes, field notes) and copy-paste station templates.",
+  "version": "1.2.0",
+  "description": "The autonomous build engine (build mode of the agent-loops toolkit): given any task, designs a gate that can prove it done (and can fail), gets human sign-off on the target, then builds and self-verifies against that gate until green — stopping at a committed slice. Install the companion agent-loops (foundation playbook), review, planning, and infra plugins for the other modes.",
   "author": {
     "name": "Doug Fowler",
     "email": "doug@thedanielgroup.com"

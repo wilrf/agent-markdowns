@@ -5,17 +5,53 @@
     "name": "wilrf"
   },
   "metadata": {
-    "description": "Agent skill markdowns for Claude Code. Home of the autonomous build engine.",
-    "version": "1.0.0",
+    "description": "Agent skill markdowns for Claude Code — the agent-loops toolkit: a foundation playbook plus build / review / plan / infra mode plugins for autonomous, self-verifying agent work.",
+    "version": "1.2.0",
     "license": "MIT",
     "repository": "https://github.com/wilrf/agent-markdowns"
   },
   "plugins": [
     {
+      "name": "agent-loops",
+      "source": "./plugins/agent-loops",
+      "description": "Foundation: the project-agnostic operating manual for autonomous agent work — the four-station loop, machine-checkable /goal conditions, adversarial verify panels, context budgeting, overnight-lane provisioning, the harvest retro, and the self-improving retro station. The brain the mode plugins rest on.",
+      "version": "1.0.0",
+      "author": {
+        "name": "wilrf"
+      }
+    },
+    {
       "name": "engine",
       "source": "./plugins/engine",
-      "description": "The autonomous build engine: designs a gate that can prove a task done (and can fail), gets human sign-off on the target, then builds and self-verifies until green. Bundles the agent-loops playbook and station templates.",
-      "version": "1.1.0",
+      "description": "Build mode: designs a gate that can prove a task done (and can fail), gets human sign-off on the target, then builds and self-verifies until green — stopping at a committed slice.",
+      "version": "1.2.0",
+      "author": {
+        "name": "wilrf"
+      }
+    },
+    {
+      "name": "review",
+      "source": "./plugins/review",
+      "description": "Review mode: the loop with findings as the product — audits, security sweeps, deep reviews. Adversarial refute-panels, mandatory repros (no repro = no finding), loop-until-dry with an honest coverage map.",
+      "version": "1.0.0",
+      "author": {
+        "name": "wilrf"
+      }
+    },
+    {
+      "name": "planning",
+      "source": "./plugins/planning",
+      "description": "Planning mode: the loop with a spec/plan as the artifact — grounding checks, a premortem panel, every phase names its gate. Emits a machine-checkable plan that build mode consumes.",
+      "version": "1.0.0",
+      "author": {
+        "name": "wilrf"
+      }
+    },
+    {
+      "name": "infra",
+      "source": "./plugins/infra",
+      "description": "Infra mode: the loop pointed at system state — migrations, deploys, backfills. The guardrail harness comes first: parity harness, dry-run diff, canary, rehearsed rollback, smallest blast radius.",
+      "version": "1.0.0",
       "author": {
         "name": "wilrf"
       }

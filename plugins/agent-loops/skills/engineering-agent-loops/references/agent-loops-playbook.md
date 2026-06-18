@@ -26,6 +26,12 @@ means, the domain-invariant lens, and what "simplify" means.
 | Plan | spec/plan | grounding checks + premortem panel + every phase names a gate | scope: fewest phases | `planning-template.md` |
 | Infra | system state | dry-run diff, parity harness, canary, REHEARSED rollback | smallest blast radius | `infra-template.md` |
 
+Each mode ships as its own plugin in this marketplace — `engine` (build), `review`, `planning`,
+`infra` — carrying that mode's station template; `goal-template.md` lives here in `agent-loops`
+alongside this playbook. The modes compose end-to-end: plan mode emits the spec build mode
+consumes; review mode audits what build shipped; infra mode carries it to production — each
+handoff artifact adversarially verified before crossing.
+
 **Nesting doctrine.** Loops nest: goal -> phase loops -> verify rounds ->
 per-finding refute loops. Three rules keep nesting from becoming thrash:
 1. **Every level has its own done-condition.** An inner loop without one
@@ -251,7 +257,7 @@ finding" is review's "no test = no loop"); "done" is *exhaustion*
 (loop-until-dry + an honest coverage map and negative-space list), not a
 checklist; and the work is all-checker, so the false-positive discipline
 (dedup against all SEEN findings, adjudicate every claim) is the work
-itself, not hygiene around it. See `../templates/review-template.md` for the
+itself, not hygiene around it. See `review-template.md` (in the `review` plugin) for the
 copy-paste skeleton. Small scopes don't need it — one maker/checker pass
 beats the machinery; reserve it for audits where coverage accounting matters.
 
@@ -332,8 +338,8 @@ goal's job.
 The four modes are usually run one at a time. The **engine** composes them into a
 single autonomous driver: one entrypoint — *"run the engine on this"* — takes a
 task from fuzzy intent through plan → build → verify to a green, committed slice,
-under one `/goal`, with exactly two human gates. Skeleton:
-`../templates/engine-template.md`.
+under one `/goal`, with exactly two human gates. Skeleton: `engine-template.md`
+(in the `engine` plugin).
 
 The shape is a **thin driver skill** — not a mega-skill (which burns the main
 context on long runs) and not a single `Workflow` script (which runs

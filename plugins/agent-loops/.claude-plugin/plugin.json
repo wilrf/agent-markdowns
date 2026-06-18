@@ -1,0 +1,12 @@
+{
+  "name": "agent-loops",
+  "version": "1.0.0",
+  "description": "The foundation of the agent-loops toolkit: a project-agnostic operating manual for autonomous, self-verifying agent work — the four-station loop, machine-checkable /goal conditions, adversarial verify panels, context budgeting, overnight-lane provisioning, the harvest retro, and the self-improving retro station. The brain the engine/review/planning/infra mode plugins rest on.",
+  "author": {
+    "name": "Doug Fowler",
+    "email": "doug@thedanielgroup.com"
+  },
+  "repository": "https://github.com/wilrf/agent-markdowns",
+  "license": "MIT",
+  "keywords": ["agent-loops", "autonomous", "goal", "verification-gate", "verify-panel", "overnight", "long-horizon", "retro", "context-budgeting", "foundation"]
+}

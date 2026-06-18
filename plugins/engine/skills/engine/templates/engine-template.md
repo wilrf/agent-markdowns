@@ -8,8 +8,8 @@ are per-repo; the STAGES, GATES, and disciplines are not optional.
 
 This template is **self-sufficient for long runs** — it carries the gate-design, verify-
 panel, fan-out, context-budgeting and retro discipline inline, so the prompt that invokes
-it stays lean. Deeper philosophy + field notes: `../references/agent-loops-playbook.md`.
-Build stations: `goal-template.md`.
+it stays lean. Deeper philosophy + field notes: the `agent-loops` plugin's playbook
+(`agent-loops-playbook.md`). Build stations: `goal-template.md` (also in the `agent-loops` plugin).
 
 **Status: design-stage pattern, pending field-proof.** Prove the gate can FAIL (planted-bug
 self-test) before trusting the engine. Build it foundation-first: design `<verify>` → prove

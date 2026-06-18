@@ -1,49 +1,46 @@
 # agent-markdowns
 
-A Claude Code plugin marketplace for agent skill markdowns.
+A Claude Code plugin marketplace for autonomous, self-verifying agent work — the
+**agent-loops toolkit**.
 
-## Plugins
+## The toolkit: one loop engine, four modes
 
-### `engine` — the autonomous build engine
+The loop is always the same — produce an artifact → verify it against something that can
+**fail** → adversarially attack it → simplify → iterate to a machine-checkable done. Only the
+bindings change per mode. Each mode ships as its own plugin, so you install à la carte:
 
-One entrypoint for autonomous, self-verifying builds. Given any task it:
+| Plugin | Mode | What it's for |
+| ------ | ---- | ------------- |
+| **`agent-loops`** | foundation | The operating manual every mode rests on — the playbook + the `goal-template`. Install this first. |
+| **`engine`** | build | Build a feature/fix autonomously and self-verify until green, stopping at a committed slice. |
+| **`review`** | review | Audits, security sweeps, deep reviews — *findings* as the product (no repro = no finding). |
+| **`planning`** | plan | Design a spec/plan before any code; emit a machine-checkable plan build mode consumes. |
+| **`infra`** | infra | Migrations / deploys / backfills — the guardrail harness (parity, canary, rollback) comes first. |
 
-1. **Understands the intent** and classifies the work (deterministic vs. taste-based).
-2. **Designs a gate** that can prove the task done — and, critically, can *fail*.
-3. Gets your **sign-off on the target** (Gate 1) before any build.
-4. **Builds and self-verifies** against that gate until green, owning every reversible
-   call in between.
-5. Hands back a **committed slice** (Gate 2) for you to push / PR / merge / deploy.
+The mode plugins are self-contained but **richer with `agent-loops` installed alongside** —
+their skills reference its playbook for the full method.
 
-It carries the full loop discipline inline — gate design, an adversarial verify panel,
-fan-out, context budgeting, and a retro pass — so it is self-sufficient for long,
-multi-day runs.
-
-#### Bundled depth
-
-The fast path is the engine pipeline. For the broader loop-design space it bundles the
-**agent-loops playbook** and copy-paste **station templates**:
+## Layout
 
 ```
-plugins/engine/skills/engine/
-├── SKILL.md                              # the engine entrypoint (auto-loaded)
-├── references/agent-loops-playbook.md    # accumulated judgment: build/review/plan/infra
-│                                         #   modes, overnight-lane + harvest retros, context
-│                                         #   budgeting, retro station, how CC's team runs agents
-└── templates/                            # copy-paste skeletons
-    ├── goal-template.md      # build stations, all contractual
-    ├── engine-template.md    # this engine, parameterized for your repo
-    ├── review-template.md    # findings-as-product (audits, security review)
-    ├── planning-template.md  # spec/plan as the artifact
-    └── infra-template.md     # system-state changes, parity/canary/rollback
+plugins/
+├── agent-loops/   skills/engineering-agent-loops/
+│                    SKILL.md
+│                    references/agent-loops-playbook.md   # the accumulated judgment
+│                    templates/goal-template.md           # build-goal stations
+├── engine/        skills/engine/      SKILL.md + templates/engine-template.md
+├── review/        skills/review/      SKILL.md + templates/review-template.md
+├── planning/      skills/planning/    SKILL.md + templates/planning-template.md
+└── infra/         skills/infra/       SKILL.md + templates/infra-template.md
 ```
 
-The playbook is the distillation of a real autonomous run — a 7-phase semantic-search + RAG
-build (~4,900 lines added across schema, indexing, embeddings, retrieval, backfill, frontend,
-monitoring) whose adversarial verify panel caught a real bug **every phase**, including two
-security issues no compiler, lint, or test could see. Three layers, three lifespans: the
-**skill** routes (per-trigger), the **playbook** accumulates (per-repo), and your task
-**ledgers** stage (per-task) — the layering that survives context compaction.
+Three layers, three lifespans: a **skill** routes (per-trigger), the **playbook** accumulates
+(per-repo, grows over time), and your task **ledger** stages (per-task) — the layering that
+survives context compaction. The playbook is the distillation of real autonomous runs — among
+them a 7-phase semantic-search + RAG build (~4,900 lines across schema, indexing, embeddings,
+retrieval, backfill, frontend, monitoring) whose adversarial verify panel caught a real bug
+**every phase**, including two security issues no compiler, lint, or test could see — plus an
+overnight-lane night-shift retro and a multi-PR harvest off a moved base branch.
 
 ## Install
 
@@ -51,17 +48,24 @@ security issues no compiler, lint, or test could see. Three layers, three lifesp
 # Add this marketplace
 /plugin marketplace add wilrf/agent-markdowns
 
-# Install the engine plugin
+# Install the foundation + whichever modes you want
+/plugin install agent-loops@agent-markdowns
 /plugin install engine@agent-markdowns
+/plugin install review@agent-markdowns      # optional
+/plugin install planning@agent-markdowns    # optional
+/plugin install infra@agent-markdowns       # optional
 ```
 
 ## Use
 
 ```
-/engine <your task>
+/engine <your task>          # build mode — directly invocable
 ```
 
-…or just say "use the engine for this" / "run the engine on …".
+…or just **describe the work** and the right mode triggers on its own: "audit this for
+security" → `review`, "plan the X feature first, don't code" → `planning`, "migrate this table
+safely" → `infra`. `/engine` and the `engineering-agent-loops` skill are directly invocable;
+the review / planning / infra skills fire on their trigger phrases.
 
 ## License
 

@@ -1,0 +1,12 @@
+{
+  "name": "infra",
+  "version": "1.0.0",
+  "description": "Infra mode for autonomous agents: the loop engine pointed at system state — migrations, deploys, backfills, live-data changes. The guardrail harness comes BEFORE the change: parity harness (close against 'parity passes', not 'script ran'), dry-run diff, canary, rehearsed rollback, smallest blast radius. Companion to the agent-loops foundation.",
+  "author": {
+    "name": "Doug Fowler",
+    "email": "doug@thedanielgroup.com"
+  },
+  "repository": "https://github.com/wilrf/agent-markdowns",
+  "license": "MIT",
+  "keywords": ["infra", "migration", "deploy", "parity-harness", "canary", "rollback", "backfill", "blast-radius", "agent-loops"]
+}

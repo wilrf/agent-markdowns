@@ -551,6 +551,123 @@ did. Engineer for it instead of being surprised by it:
 
 ---
 
+## Provisioning an overnight lane (a night-shift retro)
+
+Three lanes ran the same harness one night — none failed, none ran out of tokens; all
+three **self-terminated on a dry convergence condition** in 20–90 minutes against a budget
+of all night. The discipline was right (they stopped at dry instead of padding — the #1
+anti-pattern avoided); the **provisioning** was thin. A loop's reach =
+**scope ceiling × done-condition shape × starting base**, and a night run that
+under-delivers usually mis-sets all three the same way. What was learned:
+
+1. **A loop dries at the first scope wall it can't cross — so scout the wall before bed and
+   pre-authorize the one crossing that unlocks the most work.** One lane's largest remaining
+   surface (~50 files) sat behind a one-line test-runner config fix it correctly refused to
+   make under a "no config edits" scope; another's remaining work all needed runtime guards,
+   barred by an "annotation-only" scope. Each lane was one pre-granted permission away from
+   hours more work. Before launching, ask: *what single permission, if granted, unlocks the
+   most remaining work?* — and grant it explicitly in the prompt.
+
+2. **"Run all night" and "run until dry" are different contracts. Don't point a convergence
+   (loop-until-dry) done-condition at an all-night budget.** Dry = done is review-mode's
+   terminus; it fires the instant the *reachable, in-scope* surface empties. For utilization,
+   give the lane either a **target above the easy frontier** (e.g. "package branch coverage
+   ≥ 60%") or an **escalating tier ladder** where a dry pass at tier N *promotes* to tier N+1
+   instead of stopping (annotation-only → runtime fixes → cross-package). Keep dry-detection
+   as the promotion trigger, not the Stop.
+
+3. **Pre-bake the environment contract into the launch prompt — friction paid once per lane
+   is friction paid N times.** All three lanes independently rediscovered the same facts: the
+   runtime version pin, the baseline-red exclusions (suites that are red on this OS / need a
+   service running and are OUT OF SCOPE to fix), and which command is the gate. Put these in
+   the prompt header so no lane spends its first 20 minutes finding them. (The one rule:
+   change the harness so the mistake can't recur.)
+
+4. **Branch night lanes off a base where the gate is already wired.** The three lanes branched
+   off a stale integration merge that predated the aggregate gate script, so each rebuilt the
+   gate by hand. Start lanes from the current `main`/working branch.
+
+5. **Deeper lanes, not more lanes.** The machine sat idle most of the night behind three
+   under-scoped lanes. Agent count is the last dial (see "the one rule"); the fix for low
+   utilization is bigger scope + tier ladders on 1–3 lanes, never a wider swarm one human
+   can't review.
+
+6. **The handoff backlog is the next night's goal input.** Each lane left a "for humans /
+   other lanes" section — one lane's runtime bugs are a complete tier-2 goal; another's
+   config-fenced file list is the next coverage run. Make "roll handoff items into tomorrow's
+   goal prompts" a morning step, or the discovery dies in the ledger.
+
+**Paste-to-launch skeleton** (a night lane is a `/goal` from `goal-template.md` with the
+provisioning above filled in):
+
+```
+/goal [WHAT, per WHICH spec] until [TARGET above the easy frontier, OR tier
+ladder: dry at tier N → promote to tier N+1, stop only after the top tier dries].
+DONE measured by: [machine-checkable — e.g. the gate exits 0 AND <coverage /
+escape-count target>].
+
+BASE: branch off <current main/working branch> (gate already wired).
+ENV CONTRACT (don't rediscover): run gates via <your runtime pin>; baseline-red
+and OUT OF SCOPE to fix — <suites red on this OS / needing prod env>. Gate =
+`verify` (fast tier per iteration).
+PRE-AUTHORIZED CROSSING: [the one scope wall you're granting — e.g. "you MAY edit
+the test-runner config to resolve the path alias"]. Everything else stays in scope.
+STATIONS + RETRO: per goal-template.md. On dry / at done, write a "for humans /
+other lanes" handoff section in the ledger — it seeds the next night.
+```
+
+---
+
+## Re-slicing finished work onto a moved base branch (a harvest retro)
+
+A common long-horizon shape: a long-lived feature/integration branch has accumulated many
+intertwined features, and you want to land them on `main` as **focused, independently-
+reviewable slices** — one PR per feature, each cut from the *current* base, carrying only
+that feature's dependency closure, each green on the gate before it opens. This is its own
+gate-design problem, distinct from building on the branch, and these four traps each cost a
+phase or would block a fresh session:
+
+1. **The gate command may not exist on the base branch.** The tooling you rely on (the
+   aggregate gate script, a lint config, a test harness) may live only on the *feature*
+   branch and have never shipped to the base you're cutting from. A worktree cut from the
+   base then has no gate. Don't assume the feature branch's tooling exists at the cut point:
+   discover the base's real scripts and **reconstruct the gate from its underlying commands**
+   — never port the harness into the slice (that pollutes the slice with out-of-scope files
+   and fails the isolation check below).
+
+2. **A cross-feature leak is invisible to the type-checker.** When a shared/host file (a
+   schema, a global stylesheet, a heavily-edited host component) carries several features'
+   changes at once, a wholesale `git checkout feature -- <file>` *compiles cleanly* — so
+   type-check stays green while you've dragged four other features in. The ONLY sensor that
+   catches over-pull is the **isolation diff**: `git diff base..HEAD --name-only` must be a
+   subset of *this* feature's manifest. The gate and the isolation check are **non-redundant**;
+   a harvest run without the isolation check silently ships leaks. Cheapest reliable extraction
+   signal: **per-file commit attribution** — `git log base..feature -- <file>`; if only this
+   feature's commits touched it, checkout wholesale is safe; if other commits did, hand-extract
+   the hunk or drop the file.
+
+3. **The "unshipped" premise goes stale — re-ground every group against the base first.** A
+   launch prompt's "absent from the base" snapshot rots as the base advances. In one run, a
+   feature the prompt listed as unshipped was already 100% on the base (landed via an earlier
+   harvest) — trusting the prompt would have fabricated a PR or forced a flag onto live code.
+   Re-confirm *actually missing vs the base* as step 1 of every phase. "Already on the base"
+   is a valid, honest outcome — bank it, don't invent work.
+
+4. **Worktree visual smoke validates the *running* checkout, not your slice.** The dev server
+   on the fixed port serves the *main* checkout, not your slice's worktree (and the fixed-port
+   rule forbids standing up a second server). So a smoke failure may be **version skew** — the
+   base branch's test asserting against the running feature branch's app — not a defect in your
+   slice. Before acting on any smoke failure, diff-attribute it: *does the slice even touch the
+   failing surface?* For faithful evidence, drive an authenticated browser screenshot of *that*
+   surface rather than blaming the whole suite.
+
+The unifying point: harvesting onto a moved base is a different problem than building on the
+branch — the base lacks the branch's tooling, the type-checker can't see leaks, and the live
+app isn't your slice. Reconstruct the gate, make the isolation diff a first-class check, and
+re-ground before every phase.
+
+---
+
 ## Anti-patterns (stop if you catch yourself here)
 
 - **Looping without a real failure signal.** No gate = not a loop.
@@ -607,6 +724,63 @@ four natively; the bash loop is what you write when you can't reach it.
 
 ---
 
+## How Claude Code's own team runs agents (Boris Cherny)
+
+Notes from how the people who built this tool actually use it. Most of it the playbook
+above already does; the parts that *correct* the build-more-harness instinct are flagged.
+
+- **Scaffolding is temporary — the harness is not precious.** Every gate-adjacent thing you
+  build (verify panels, fan-out, the station list, even subagents) is scaffolding that
+  corrects for *today's* model's errors. Their team rips out large chunks of prompt/tooling
+  with each model release — they deleted ~half the Claude Code system prompt when the 4-series
+  landed — and they treat subagents as "scaffolding for models of today" that may be
+  deprecated as models manage their own context. **The gate is permanent; the apparatus around
+  it is disposable.** The instinct everywhere above is to *add* harness; the counterweight is
+  to periodically ask of each scaffold "does the current model still need this?" and delete
+  what it's outgrown. Reach for the lightest harness that still holds the gate. Don't get
+  attached to code or prompts — rewriting them is cheap now.
+
+- **Right-size the ceremony to the task — and the frontier moves with every model.** Their
+  mental model is easy / medium / hard: *easy* = one prompt, often just done in a GitHub
+  issue/PR; *medium* = some back-and-forth, plan-mode lifts it from ~20-30% to ~70-80%
+  first-try success; *hard* = break it down, write the plan to a markdown file, then implement
+  (and sometimes hand-finish in the IDE). The boundary between "just do it" and "run the full
+  loop" rises with each model release — re-feel it, don't cargo-cult the full apparatus onto a
+  task the model can now one-shot.
+
+- **Planning is the cheapest, highest-leverage scaffold.** Plan-mode is "just a scaffold" — a
+  tiny "don't code yet" message — and it roughly triples medium-task success. For hard tasks,
+  the plan goes in a markdown file before any code. (This is why the goal template / STAGE 1
+  is non-optional, and why the ledger is plan-first.)
+
+- **Model-by-phase: stronger model to plan, faster model to execute.** Their default is
+  Opus-for-plan, Sonnet-for-code — once the plan exists, the cheaper/faster model codes with no
+  measured quality loss. Apply the same split to fan-out: spend the strong model on
+  design/planning/adjudication, the fast one on mechanical execution.
+
+- **Spend to a bug budget, not to zero.** "There's no software with no bugs unless you're
+  building NASA satellites" — the bar is that it *feels* reliable and fast, not perfection.
+  Once the gate is green and a surface looks right, stop; chasing the last cosmetic residue on
+  the non-deterministic tail is its own failure mode.
+
+- **Encode only what the agent *repeatedly* struggles with.** Their CLAUDE.md rule: don't
+  pre-load a wall of instructions — add the recurring failures you actually observe (wrong test
+  runner, wrong directory, skipped verification), and let the agent self-update memory (the `#`
+  key) rather than hand-editing. This is exactly the retro-station bar ("bit twice / cost a
+  phase / would bite a fresh session") — keep promotion *earned*, not speculative, or the doc
+  rots into noise. And check every bit of config (commands, agents, hooks, settings) into the
+  repo so the whole team inherits it.
+
+- **Reassuring confirmation of the defaults above:** Claude writes ~all the PRs and divides the
+  work into focused, logical commits; Claude does most of the *code review* (a short "compare to
+  CLAUDE.md, look for obvious bugs" pass) and catches bugs before humans; a standing
+  *code-simplification* subagent fights the model's tendency to over-engineer. That's the
+  pathspec-slice + adversarial-panel + simplicity-lens discipline above — the new instruction is
+  just to keep questioning whether each piece of it still earns its keep.
+
+---
+
 *Throughline: you're not learning to prompt better — you're building the harness
 that lets a small number of agents run hard without babysitting. Build the gate
-first; the loops are easy once something can tell them they're wrong.*
+first; the loops are easy once something can tell them they're wrong. And keep the
+harness only as heavy as the model still needs — scaffolding is meant to be deleted.*

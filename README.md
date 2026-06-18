@@ -28,7 +28,8 @@ The fast path is the engine pipeline. For the broader loop-design space it bundl
 plugins/engine/skills/engine/
 ├── SKILL.md                              # the engine entrypoint (auto-loaded)
 ├── references/agent-loops-playbook.md    # accumulated judgment: build/review/plan/infra
-│                                         #   modes, field notes, build order, retro
+│                                         #   modes, overnight-lane + harvest retros, context
+│                                         #   budgeting, retro station, how CC's team runs agents
 └── templates/                            # copy-paste skeletons
     ├── goal-template.md      # build stations, all contractual
     ├── engine-template.md    # this engine, parameterized for your repo

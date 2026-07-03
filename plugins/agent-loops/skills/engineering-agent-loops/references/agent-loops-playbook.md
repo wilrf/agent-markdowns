@@ -257,8 +257,8 @@ finding" is review's "no test = no loop"); "done" is *exhaustion*
 (loop-until-dry + an honest coverage map and negative-space list), not a
 checklist; and the work is all-checker, so the false-positive discipline
 (dedup against all SEEN findings, adjudicate every claim) is the work
-itself, not hygiene around it. See `review-template.md` (in the `review` plugin) for the
-copy-paste skeleton. Small scopes don't need it — one maker/checker pass
+itself, not hygiene around it. See `review-template.md` (the `engine-review` skill in the
+`engine` plugin) for the copy-paste skeleton. Small scopes don't need it — one maker/checker pass
 beats the machinery; reserve it for audits where coverage accounting matters.
 
 ---

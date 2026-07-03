@@ -1,5 +1,5 @@
 ---
-name: review
+name: engine-review
 description: Use when the product is FINDINGS, not code — a security audit, a vulnerability sweep, a pre-merge deep review, a dead-code or dependency audit, or any "find everything wrong with X" pass. Triggers on "audit", "security review", "review this PR/codebase for bugs", "find vulnerabilities", "deep review", "exhaustively check". For a single small PR, the built-in /code-review beats this; reserve the loop for audits where coverage accounting matters.
 user-invocable: false
 ---

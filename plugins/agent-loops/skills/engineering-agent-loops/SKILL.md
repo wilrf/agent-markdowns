@@ -13,21 +13,21 @@ This is the **brain** of the agent-loops toolkit. The full operating manual live
 Wherever the manual says **`verify`**, substitute your project's real aggregate gate (the one
 command that chains type-check + lint + tests into a single exit code).
 
-## The four modes (each is its own companion plugin)
+## The four modes (all four ship as skills in the `engine` plugin)
 
 The loop is one engine — produce an artifact → verify it against something that can **fail** →
 adversarially attack it → simplify → iterate to a machine-checkable done. Only four bindings
-change with the work. Each mode ships as a sibling plugin in this marketplace; install the
-ones you need:
+change with the work. All four modes ship as skills inside the single `engine` plugin in this
+marketplace; installing it gives you all of them:
 
-| Mode | Plugin | Artifact | Gate that can fail |
-| ---- | ------ | -------- | ------------------ |
+| Mode | Skill (in the `engine` plugin) | Artifact | Gate that can fail |
+| ---- | ------------------------------ | -------- | ------------------ |
 | **Build** | `engine` | code | tests / types / lint / smoke |
-| **Review** | `review` | findings | refute-panels + repros |
-| **Plan** | `planning` | spec/plan | grounding checks + premortem |
-| **Infra** | `infra` | system state | dry-run diff, parity harness, canary, rehearsed rollback |
+| **Review** | `engine-review` | findings | refute-panels + repros |
+| **Plan** | `engine-planning` | spec/plan | grounding checks + premortem |
+| **Infra** | `engine-infra` | system state | dry-run diff, parity harness, canary, rehearsed rollback |
 
-This plugin is the foundation they all rest on. The mode plugins carry their own station
+This plugin is the foundation they all rest on. The mode skills carry their own station
 template and trigger; they're richer with this playbook installed alongside.
 
 ## What the playbook covers

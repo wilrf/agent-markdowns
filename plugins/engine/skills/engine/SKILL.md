@@ -1,6 +1,6 @@
 ---
 name: engine
-description: The autonomous build engine. Use when the user says "use the engine for this", "run the engine on …", "/engine", or asks for an autonomous / long-horizon build that should design its own checks and verify its own work before handing back. Also fires for designing or running ANY autonomous loop — "set up a loop", "run this overnight", "let it iterate until…", "fan out agents", "create a workflow to…", a maker/checker pair, worktree parallelism, or any task whose done-condition you intend to express as a machine-checkable condition. Given any task, you understand the intent, DESIGN A GATE that can prove it done (and can fail), get the human's sign-off on the target, then build and self-verify against that gate until green — stopping at a committed slice. Carries the full loop discipline inline (gate design, verify panel, fan-out, context budgeting, retro) so it is self-sufficient for multi-day build runs; for the broader loop-design space (review / plan / infra modes, the full playbook, station templates) install the companion `agent-loops` / `review` / `planning` / `infra` plugins in this marketplace.
+description: The autonomous build engine. Use when the user says "use the engine for this", "run the engine on …", "/engine", or asks for an autonomous / long-horizon build that should design its own checks and verify its own work before handing back. Also fires for designing or running ANY autonomous loop — "set up a loop", "run this overnight", "let it iterate until…", "fan out agents", "create a workflow to…", a maker/checker pair, worktree parallelism, or any task whose done-condition you intend to express as a machine-checkable condition. Given any task, you understand the intent, DESIGN A GATE that can prove it done (and can fail), get the human's sign-off on the target, then build and self-verify against that gate until green — stopping at a committed slice. Carries the full loop discipline inline (gate design, the ledger, verify panel, fan-out, context budgeting, retro) so it is self-sufficient for multi-day build runs. The review / plan / infra modes ship alongside this skill as the `engine-review` / `engine-planning` / `engine-infra` skills (same plugin — they fire on their own triggers, no extra install); add the companion `agent-loops` plugin for the full operating-manual playbook.
 user-invocable: true
 ---
 
@@ -12,17 +12,21 @@ yes on the target → build and self-verify against that gate until green → ha
 committed slice. This skill is **self-sufficient for long autonomous runs** — it carries
 the gate-design, verify-panel, fan-out, context-budgeting and retro discipline inline.
 
-**Deeper reference (companion plugins).** The build pipeline below is the fast path and is
-self-sufficient for a build. For the broader loop-design space — the four modes (build /
-**review** / **plan** / **infra**), the full operating manual, field notes, and copy-paste
-station skeletons — install the companion plugins in this marketplace:
-- **`agent-loops`** — the foundation: the accumulated-judgment playbook (read it before
-  designing a non-build loop or any unusually large run) + the `goal-template` build-station
-  skeleton.
-- **`review`** / **`planning`** / **`infra`** — the non-build modes, each with its own
-  trigger and station template.
-- This plugin bundles [`templates/engine-template.md`](templates/engine-template.md) — the
-  engine parameterized for your repo.
+**Deeper reference.** The build pipeline below is the fast path and is self-sufficient for a
+build. The other three modes ship **alongside this skill in the same plugin** and fire on
+their own triggers — nothing extra to install:
+- **`engine-review`** — findings as the product (audits, security sweeps): refute-panels,
+  mandatory repros, loop-until-dry with an honest coverage map.
+- **`engine-planning`** — a spec/plan as the artifact: grounding checks, a premortem panel,
+  every phase names its gate; emits a machine-checkable plan this build mode consumes.
+- **`engine-infra`** — system state (migrations, deploys, backfills): the guardrail harness
+  (parity, dry-run diff, canary, rehearsed rollback) comes *before* the change.
+
+For the full operating manual — the accumulated-judgment playbook, field notes, and the
+`goal-template` station skeleton — install the companion **`agent-loops`** plugin (read it
+before designing a non-build loop or any unusually large run). This plugin also bundles
+[`templates/engine-template.md`](templates/engine-template.md) — the engine parameterized for
+your repo.
 
 **Quick gut-check before you loop:** (1) is there a command that can actually **fail**? no gate =
 no loop. (2) is "done" an exit code / checked artifact, not a vibe? (3) dynamic `Workflow` → did
@@ -122,8 +126,11 @@ built at write-time, not bolted on in review:
 - **Reuse before you add** — search for an existing helper / type / pattern and extend it
   before spawning a parallel one. A new abstraction needs a second caller or a real boundary
   to earn its keep; speculative "for later" generality is debt, not foresight.
-- **Fewest readable lines** — delete don't golf; smallest diff that does the job; remove the
-  code you replaced (no dead branches, no commented-out husks).
+- **Fewest *readable* lines — simplify, don't golf.** Fewer lines means *less code*, not the
+  same code crammed onto fewer lines — readability wins every tie. Delete rather than comment
+  out; smallest diff that does the job; remove the code you replaced (no dead branches, no
+  commented-out husks). The simplest version that works is the target — reach for it at
+  write-time, not in a bolted-on cleanup pass.
 - **Test-first where the gate needs a check that doesn't exist** (TDD): write the failing
   test, watch it fail, then make it pass.
 - Fan out builders for large work (see "Fan-out"). Update the ledger **before** each commit.
@@ -132,8 +139,9 @@ built at write-time, not bolted on in review:
 user journey after **every** fix (not "the last error is gone" — layered failures hide
 behind each other). Run the adversarial panel (see "The verify panel").
 
-**STAGE 4 — RETRO + COMMIT** — promote ledger traps (see "Retro"); ONE **pathspec** commit
-of the focused slice (never bundle others' dirty files).
+**STAGE 4 — RETRO + COMMIT** — promote ledger traps (see "Retro"); ONE commit of the focused
+slice made with **explicit pathspecs** (`git commit -- <path> …`), never `git add -A` — a
+shared checkout may hold another lane's dirty files and `-A` bundles them into your commit.
 - **╞═ GATE 2:** stop. Green + committed, waiting on the human's go. ═╡
 
 ## Designing the gate (the heart of the engine)
@@ -201,14 +209,30 @@ each toward "refuted/failing unless proven otherwise."
   ~1 in 3 minor findings collide with reality. Check each proposed change against the real
   gate; log every rejection + rationale to the ledger's **"do-NOT-re-raise"** list and
   paste that list into the next panel prompt.
+- **Re-verify the *fix*, refute-biased.** A confirm-biased pass ("does this look fixed?")
+  ships wrong root causes. When a finding drives a change, run one more pass prompted to
+  *refute the fix* — "prove this didn't actually address it; prove the severity is wrong." A
+  real run had exactly this re-pass overturn both a wrong root cause and a wrong severity that
+  the confirm-biased first pass had blessed.
 - **Pin the verifier model** on orchestrated/`Workflow` agents — a panel that silently
-  errors is indistinguishable from one that found nothing.
+  errors is indistinguishable from one that found nothing (and, per fan-out above, an
+  unpinned one also burns the expensive tier).
 
 ## Fan-out & workflows
 
 Reserve fan-out for genuinely large work (many files, audits, migrations); for a small
 task a dynamic `Workflow` is just an expensive single agent. When you do fan out:
 
+- **Pin the model — and the effort — on every fan-out.** Subagents inherit the *session*
+  model by default, so an unpinned fan-out from an expensive session silently spawns
+  expensive workers — the #1 budget leak. Pin each agent to the cheapest tier that can do
+  its slice; reserve the expensive tier for the hard verify/judge kernels, and raise effort
+  per-agent for a genuinely hard sub-problem rather than raising it globally.
+- **Isolate parallel *writers*.** Agents writing in parallel on one shared, dirty checkout
+  clobber each other — and can *revert uncommitted WIP* with a stray `git checkout` / `restore`
+  (unrecoverable; not in git history, not in the editor's undo). Give each writer its own git
+  worktree (`isolation: 'worktree'`), or forbid destructive git in its prompt and have it
+  return a diff. Read-only verifiers can safely share the tree.
 - **`pipeline()` by default** — items flow through stages with no barrier; only use a
   barrier (`parallel()`) when a stage genuinely needs ALL prior results at once (dedup,
   early-exit on zero, cross-item comparison).
@@ -255,10 +279,14 @@ goes green on empty arrays. **Every mocked boundary** must name the station that
 the real thing; one with none is a ledger-recorded gap, not a shrug. At phase end, sketch
 the verification matrix (paths × real-vs-mocked × envs) and list the unexercised cells.
 
-## The ledger (`<plans-dir>/<task>-progress.md`, created at Gate 1)
+## The ledger — the run's spine (`<plans-dir>/<task>-progress.md`, created at Gate 1)
 
-Source of truth; updated **before every commit**; survives compaction. Put it where the
-project keeps plans (e.g. `.claude/plans/`) or alongside the work. Sections:
+**This is the single most important discipline in the engine.** The ledger is the source of
+truth; the conversation is scratch. **If it isn't in the ledger, it doesn't exist** — a run
+whose ledger has gone stale is one you cannot resume, `/compact`, or trust. Update it
+**before every commit** and at every phase boundary, and keep it complete enough that a fresh
+session with zero context could read it and pick the run up cold. Put it where the project
+keeps plans (e.g. `.claude/plans/`) or alongside the work. Sections:
 - **Goal / DONE block** (the approved target) and **the designed gate**
 - **Phase status** (per phase: todo / done / blocked-with-reason)
 - **Decisions made** (with the alternatives rejected and why) · **Findings REJECTED with rationale** (the "do-NOT-re-raise" list)

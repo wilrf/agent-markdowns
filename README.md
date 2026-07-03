@@ -3,35 +3,46 @@
 A Claude Code plugin marketplace for autonomous, self-verifying agent work — the
 **agent-loops toolkit**.
 
-## The toolkit: one loop engine, four modes
+## The toolkit: one loop engine, four modes, two plugins
 
 The loop is always the same — produce an artifact → verify it against something that can
 **fail** → adversarially attack it → simplify → iterate to a machine-checkable done. Only the
-bindings change per mode. Each mode ships as its own plugin, so you install à la carte:
+bindings change per mode. All four modes ship in **one plugin** (`engine`); the accumulated
+operating manual ships in a second (`agent-loops`) you install alongside for the depth.
 
-| Plugin | Mode | What it's for |
-| ------ | ---- | ------------- |
-| **`agent-loops`** | foundation | The operating manual every mode rests on — the playbook + the `goal-template`. Install this first. |
-| **`engine`** | build | Build a feature/fix autonomously and self-verify until green, stopping at a committed slice. |
-| **`review`** | review | Audits, security sweeps, deep reviews — *findings* as the product (no repro = no finding). |
-| **`planning`** | plan | Design a spec/plan before any code; emit a machine-checkable plan build mode consumes. |
-| **`infra`** | infra | Migrations / deploys / backfills — the guardrail harness (parity, canary, rollback) comes first. |
+| Plugin | Ships | What it's for |
+| ------ | ----- | ------------- |
+| **`engine`** | four skills | The build mode plus its three sibling modes — one install, no à-la-carte. |
+| **`agent-loops`** | foundation | The operating manual every mode rests on — the playbook + the `goal-template`. Install alongside. |
 
-The mode plugins are self-contained but **richer with `agent-loops` installed alongside** —
-their skills reference its playbook for the full method.
+Inside the `engine` plugin, the four mode skills:
+
+| Skill | Mode | Artifact | Gate that can fail | Trigger |
+| ----- | ---- | -------- | ------------------ | ------- |
+| **`engine`** | build | code | tests / types / lint / smoke | `/engine`, or "run the engine on…" |
+| **`engine-review`** | review | findings | refute-panels + mandatory repros | "audit / security review / find bugs in…" |
+| **`engine-planning`** | plan | spec/plan | grounding checks + premortem | "plan this / design a spec before coding" |
+| **`engine-infra`** | infra | system state | parity harness, dry-run diff, canary, rehearsed rollback | "migrate / deploy / backfill safely" |
+
+`engine` is directly invocable via `/engine`; the three mode skills fire on their own trigger
+phrases (above). All four are **richer with `agent-loops` installed alongside** — their skills
+reference its playbook for the full method.
 
 ## Layout
 
 ```
 plugins/
-├── agent-loops/   skills/engineering-agent-loops/
-│                    SKILL.md
-│                    references/agent-loops-playbook.md   # the accumulated judgment
-│                    templates/goal-template.md           # build-goal stations
-├── engine/        skills/engine/      SKILL.md + templates/engine-template.md
-├── review/        skills/review/      SKILL.md + templates/review-template.md
-├── planning/      skills/planning/    SKILL.md + templates/planning-template.md
-└── infra/         skills/infra/       SKILL.md + templates/infra-template.md
+├── engine/                       # all four modes, one plugin
+│   skills/
+│   ├── engine/           SKILL.md + templates/engine-template.md      (build, /engine)
+│   ├── engine-review/    SKILL.md + templates/review-template.md
+│   ├── engine-planning/  SKILL.md + templates/planning-template.md
+│   └── engine-infra/     SKILL.md + templates/infra-template.md
+└── agent-loops/                  # the foundation
+    skills/engineering-agent-loops/
+      SKILL.md
+      references/agent-loops-playbook.md   # the accumulated judgment
+      templates/goal-template.md           # build-goal stations
 ```
 
 Three layers, three lifespans: a **skill** routes (per-trigger), the **playbook** accumulates
@@ -48,12 +59,9 @@ overnight-lane night-shift retro and a multi-PR harvest off a moved base branch.
 # Add this marketplace
 /plugin marketplace add wilrf/agent-markdowns
 
-# Install the foundation + whichever modes you want
-/plugin install agent-loops@agent-markdowns
+# The engine (all four modes) + the foundation playbook
 /plugin install engine@agent-markdowns
-/plugin install review@agent-markdowns      # optional
-/plugin install planning@agent-markdowns    # optional
-/plugin install infra@agent-markdowns       # optional
+/plugin install agent-loops@agent-markdowns   # recommended — the deep method
 ```
 
 ## Use
@@ -63,9 +71,10 @@ overnight-lane night-shift retro and a multi-PR harvest off a moved base branch.
 ```
 
 …or just **describe the work** and the right mode triggers on its own: "audit this for
-security" → `review`, "plan the X feature first, don't code" → `planning`, "migrate this table
-safely" → `infra`. `/engine` and the `engineering-agent-loops` skill are directly invocable;
-the review / planning / infra skills fire on their trigger phrases.
+security" → `engine-review`, "plan the X feature first, don't code" → `engine-planning`,
+"migrate this table safely" → `engine-infra`. `/engine` and the `engineering-agent-loops`
+skill are directly invocable; the review / planning / infra skills fire on their trigger
+phrases.
 
 ## License
 

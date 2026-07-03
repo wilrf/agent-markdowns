@@ -1,5 +1,5 @@
 ---
-name: infra
+name: engine-infra
 description: Use when the artifact is SYSTEM STATE, not code — a data-store migration, a deploy, a backfill, a schema change against live data, or anything touching production or hard-to-reverse infrastructure. Triggers on "migrate this database/table", "deploy", "backfill", "cut over to", "infrastructure change", "rollback plan", "production data change". The gate here is data-shaped and the harness comes BEFORE the change.
 user-invocable: false
 ---

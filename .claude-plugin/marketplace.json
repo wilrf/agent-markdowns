@@ -5,8 +5,8 @@
     "name": "wilrf"
   },
   "metadata": {
-    "description": "Agent skill markdowns for Claude Code — the agent-loops toolkit: a foundation playbook plus build / review / plan / infra mode plugins for autonomous, self-verifying agent work, and standalone diagnostic tools.",
-    "version": "1.3.0",
+    "description": "Agent skill markdowns for Claude Code — the agent-loops toolkit: the engine plugin (build / review / plan / infra modes as engine-* skills) plus the agent-loops foundation playbook, for autonomous, self-verifying agent work, and standalone diagnostic tools.",
+    "version": "2.0.0",
     "license": "MIT",
     "repository": "https://github.com/wilrf/agent-markdowns"
   },
@@ -14,7 +14,7 @@
     {
       "name": "agent-loops",
       "source": "./plugins/agent-loops",
-      "description": "Foundation: the project-agnostic operating manual for autonomous agent work — the four-station loop, machine-checkable /goal conditions, adversarial verify panels, context budgeting, overnight-lane provisioning, the harvest retro, and the self-improving retro station. The brain the mode plugins rest on.",
+      "description": "Foundation: the project-agnostic operating manual for autonomous agent work — the four-station loop, machine-checkable /goal conditions, adversarial verify panels, context budgeting, overnight-lane provisioning, the harvest retro, and the self-improving retro station. The brain the engine modes rest on.",
       "version": "1.0.0",
       "author": {
         "name": "wilrf"
@@ -23,35 +23,8 @@
     {
       "name": "engine",
       "source": "./plugins/engine",
-      "description": "Build mode: designs a gate that can prove a task done (and can fail), gets human sign-off on the target, then builds and self-verifies until green — stopping at a committed slice.",
-      "version": "1.2.0",
-      "author": {
-        "name": "wilrf"
-      }
-    },
-    {
-      "name": "review",
-      "source": "./plugins/review",
-      "description": "Review mode: the loop with findings as the product — audits, security sweeps, deep reviews. Adversarial refute-panels, mandatory repros (no repro = no finding), loop-until-dry with an honest coverage map.",
-      "version": "1.0.0",
-      "author": {
-        "name": "wilrf"
-      }
-    },
-    {
-      "name": "planning",
-      "source": "./plugins/planning",
-      "description": "Planning mode: the loop with a spec/plan as the artifact — grounding checks, a premortem panel, every phase names its gate. Emits a machine-checkable plan that build mode consumes.",
-      "version": "1.0.0",
-      "author": {
-        "name": "wilrf"
-      }
-    },
-    {
-      "name": "infra",
-      "source": "./plugins/infra",
-      "description": "Infra mode: the loop pointed at system state — migrations, deploys, backfills. The guardrail harness comes first: parity harness, dry-run diff, canary, rehearsed rollback, smallest blast radius.",
-      "version": "1.0.0",
+      "description": "The autonomous engine — all four modes in one plugin. Build (`engine`, /engine-invocable): design a gate that can prove a task done and can fail, get human sign-off on the target, then build and self-verify until green, stopping at a committed slice. Plus three sibling mode skills that fire on their own triggers: `engine-review` (findings as the product — refute-panels, mandatory repros, loop-until-dry), `engine-planning` (a machine-checkable spec/plan — grounding checks, premortem, every phase names its gate), `engine-infra` (system state — guardrail harness first: parity, dry-run diff, canary, rehearsed rollback). Install agent-loops alongside for the deep playbook.",
+      "version": "2.0.0",
       "author": {
         "name": "wilrf"
       }

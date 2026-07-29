@@ -48,6 +48,15 @@
       }
     },
     {
+      "name": "stack",
+      "source": "./plugins/stack",
+      "description": "The mega skill — one entry point (/stack <task>) that conducts the full pipeline: recall, git-discipline lanes, ledger, shaping/bug-replication, the engine+delegate execution machine, and the quality tripod, sealed by verification. Ships the doctrine alongside the conductor skill.",
+      "version": "1.0.0",
+      "author": {
+        "name": "wilrf"
+      }
+    },
+    {
       "name": "user-walkthrough",
       "source": "./plugins/user-walkthrough",
       "description": "The Playwright leg of the quality tripod: drive the running app like a real user — every workflow end-to-end, then the edge-case battery (empty states, invalid input, double-actions, refresh mid-flow, small viewport). Findings and screenshots to the ledger; green unit tests are not this.",

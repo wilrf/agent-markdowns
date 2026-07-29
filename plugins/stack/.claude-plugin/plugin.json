@@ -1,0 +1,8 @@
+{
+  "name": "stack",
+  "description": "The mega skill — one entry point (/stack <task>) that conducts the full operating pipeline: Coast recall, git-discipline lane setup, the ledger, shaping (brainstorm/plan or the three-leg bug-replication protocol), the execution machine (engine + govern/liaison + codex delegation), and the quality tripod (user-walkthrough on both surfaces, adversarial + security review, simplify), sealed by verification-before-completion. Ships the doctrine (DOCTRINE.md) alongside the conductor skill. Pairs with the engine, ledger, user-walkthrough, and orchestration plugins from this marketplace.",
+  "version": "1.0.0",
+  "author": {
+    "name": "wilrf"
+  }
+}

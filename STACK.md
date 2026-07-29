@@ -24,6 +24,28 @@ request, use it to recover the three things prompts most often omit:
 Ground the interpretation in recorded evidence; if the record has nothing,
 say so and ask rather than guess.
 
+## Cross-cutting · Git discipline (HIGH PRIORITY — violations void the run)
+
+Main is the only durable truth; branches are disposable scratch. The
+`orchestration` plugin's governor/liaison roles carry these mechanics in
+multi-lane phases — but the rules bind every repo and every run:
+
+- **Worktree-per-lane** — parallel or long-horizon work gets its own worktree
+  off fresh origin/main. Two writers NEVER share one checkout. Remove
+  worktrees when the lane ends.
+- **Branch hygiene** — start from fresh main; short-lived, single-concern
+  branches; one branch → one small PR, merged in days not weeks; never stack
+  a PR on another feature branch; delete branches after merge (archive-tag
+  anything substantial first).
+- **Never cross lanes** — commit with explicit pathspecs so another lane's
+  dirty files are never bundled; never repoint a shared checkout's branch;
+  never stash/reset/clean someone else's WIP to make your push work.
+- **Push discipline** — plain `git push` only: no --force, --no-verify,
+  --mirror, --delete, +refspec, ever. Merges to main belong to the human
+  owner alone; an agent's job ends at an open, gated PR.
+- **Stay synced** — fetch + merge origin/main daily and before each session;
+  a day of drift is a trivial merge, three weeks is archaeology.
+
 ## Cross-cutting · Ledger (plugin: `ledger`)
 
 Any task spanning multiple phases, sessions, or context windows opens

@@ -37,6 +37,15 @@
       "author": {
         "name": "wilrf"
       }
+    },
+    {
+      "name": "orchestration",
+      "source": "./plugins/orchestration",
+      "description": "Governor/Liaison split for multi-lane agent phases: `govern` opens the policy-and-sequencing authority (read-only inspection, docs-only writes, receipt audits); `liaison` runs one lane's mechanics (worktrees, build dispatch, gates, commits, PRs) and can never merge to main. Extracted verbatim from csa-new 2026-07-29; repo-specific paths and policies need adapting for other projects.",
+      "version": "1.0.0",
+      "author": {
+        "name": "wilrf"
+      }
     }
   ]
 }

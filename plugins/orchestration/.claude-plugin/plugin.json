@@ -1,0 +1,8 @@
+{
+  "name": "orchestration",
+  "description": "Governor/Liaison split for multi-lane agent phases: `govern` opens the policy-and-sequencing authority (read-only inspection, docs-only writes, receipt audits); `liaison` runs one lane's mechanics (worktrees, build dispatch, gates, commits, PRs) and can never merge to main. Extracted verbatim from the csa-new repo 2026-07-29 — repo-specific paths and policies (Doug, Policy P-8, .claude/docs/* references) need adapting before use in another project.",
+  "version": "1.0.0",
+  "author": {
+    "name": "wilrf"
+  }
+}

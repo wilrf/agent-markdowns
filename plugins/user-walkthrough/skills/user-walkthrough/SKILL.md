@@ -11,10 +11,27 @@ the product is broken" is a failure class only a browser can catch: dead
 buttons, unwired state, layout collapse, a form that submits nowhere. The
 feature must be SEEN working, driven the way a user would drive it.
 
-## 0 · Setup
+## 0 · Setup — know your surface
+
+Most projects have two testable surfaces with DIFFERENT roles. Walk both,
+never confuse them:
+
+- **The build surface** (local dev, e.g. `localhost:3000`) — full freedom:
+  drive, mutate, seed, instrument. Fixes are built and gate-verified here
+  first. Playwright / Playwright MCP with the project's storage-state auth.
+- **The observe surface** (deployed production, e.g. the project's Vercel
+  URL) — READ-ONLY. Used only to (a) confirm a defect exists for real users
+  before fixing and (b) confirm the fix after it deploys. No mutations, no
+  test data; actions that trigger real AI/API cost sparingly. Prefer the
+  user's own signed-in browser (Claude-in-Chrome) here; never wire test
+  auth against prod.
+
+The ledger records which surface every finding and every proof came from —
+a bug repro'd only on dev might be env noise; a fix verified only on dev is
+not user-verified.
 
 - Find the running app (dev server, preview URL) or start it with the
-  project's own launch method. Note the base URL in the ledger.
+  project's own launch method. Note the base URL + surface in the ledger.
 - Use the Playwright MCP tools (`browser_navigate`, `browser_snapshot`,
   `browser_click`, `browser_fill_form`, `browser_take_screenshot`, ...) when
   available; otherwise write a Playwright script. Snapshot > screenshot for

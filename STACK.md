@@ -87,6 +87,13 @@ The legs catch disjoint failure classes; none substitutes for another.
    refresh mid-flow, rapid navigation, small viewports, back button). Green
    unit tests are NOT this; the feature must be seen working in the browser.
    Findings go to the ledger.
+   **Two surfaces, two roles — walk both, never confuse them:** the local
+   dev server is the BUILD surface (full freedom: mutate, seed, instrument;
+   fixes gate-verify here first, via Playwright with test auth); deployed
+   production is the OBSERVE surface (read-only: confirm the bug exists for
+   real users before fixing, confirm the fix after deploy; drive with the
+   user's own signed-in browser, never wire test auth against prod). The
+   ledger records which surface each finding and proof came from.
    *Catches: code is right but the product is broken.*
 2. **Adversarial review** — reviewers prompted to REFUTE, not admire:
    `code-review` / `engine-review`, findings adjudicated by a

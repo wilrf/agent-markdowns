@@ -68,18 +68,24 @@ layers; the engine + delegate + gate core is always on.
 All three legs, every feature. A feature that skipped a leg is not done.
 The legs catch disjoint failure classes; none substitutes for another.
 
-1. **Playwright user-testing** — drive the running app like a real user:
-   every workflow the feature touches end-to-end, then edge cases (empty
-   states, invalid input, double-clicks, rapid navigation, refresh mid-flow,
-   small viewports). Green unit tests are NOT this; the feature must be seen
-   working in the browser. Findings go to the ledger.
+1. **Playwright user-testing** (plugin: `user-walkthrough`) — enumerate every
+   workflow the feature touches, walk each end-to-end like a real user, then
+   the edge-case battery (empty states, invalid input, double-actions,
+   refresh mid-flow, rapid navigation, small viewports, back button). Green
+   unit tests are NOT this; the feature must be seen working in the browser.
+   Findings go to the ledger.
    *Catches: code is right but the product is broken.*
 2. **Adversarial review** — reviewers prompted to REFUTE, not admire:
    `code-review` / `engine-review`, findings adjudicated by a
    verify-findings pass, optionally an independent second-model lens. A
    finding survives only if it withstands a genuine attempt to kill it — and
    so does the feature.
-   *Catches: product looks right but the logic is wrong.*
+   **The security lens is a mandatory part of this leg** (default code
+   review often excludes it): a dedicated pass covering authz/authn (who can
+   reach this, per-document ownership, identity from client args), injection,
+   and data exposure. Skip only for changes with no attack surface — and say
+   so explicitly.
+   *Catches: product looks right but the logic is wrong — or exploitable.*
 3. **Simplify** — once it works and survives review, iterate the changed
    code to its sleekest form before presenting. Never settle for
    first-draft code.

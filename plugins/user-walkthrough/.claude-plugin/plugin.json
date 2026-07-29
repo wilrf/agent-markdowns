@@ -1,0 +1,8 @@
+{
+  "name": "user-walkthrough",
+  "description": "The Playwright leg of the quality tripod: drive the running app like a real user to prove a feature works in the browser. Enumerate every workflow the feature touches, walk each end-to-end with assertions and screenshots, then run the edge-case battery (empty states, invalid input, double-actions, refresh mid-flow, rapid navigation, small viewport, back button). Findings and unexercised cells go to the ledger; reruns after fixes until green. Green unit tests are not this.",
+  "version": "1.0.0",
+  "author": {
+    "name": "wilrf"
+  }
+}

@@ -14,6 +14,16 @@ Any reference to something the user did, saw, or read → query the screen-recor
 / session-history tooling first (Coast, transcripts). Never guess at the past
 when it's recorded.
 
+Recall also fills in what the prompt forgot to say. Before any non-trivial
+request, use it to recover the three things prompts most often omit:
+
+- **Intent** — what was the user just doing/looking at that prompted the ask?
+- **Scope** — which repo, branch, PR, file, or app is "this"/"it"?
+- **Context** — errors, messages, or state they saw but didn't paste.
+
+Ground the interpretation in recorded evidence; if the record has nothing,
+say so and ask rather than guess.
+
 ## Cross-cutting · Ledger (plugin: `ledger`)
 
 Any task spanning multiple phases, sessions, or context windows opens

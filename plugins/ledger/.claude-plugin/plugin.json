@@ -1,0 +1,8 @@
+{
+  "name": "ledger",
+  "description": "Working-memory discipline for any multi-phase task: keep a <task>-progress.md ledger as the source of truth (goal/DONE, phase status, decisions, do-NOT-re-raise list, anomalies, environment facts, unexercised cells), update it before every commit, /compact only at phase boundaries, and resume any session via read-ledger → next phase → gates → commit → update. Distilled from the engine's context-budgeting discipline so it composes with any execution mode.",
+  "version": "1.0.0",
+  "author": {
+    "name": "wilrf"
+  }
+}

@@ -37,13 +37,20 @@ ledger, it doesn't exist.
 
 - New feature or behavior change → `brainstorming`, then `writing-plans` for
   anything multi-step.
-- Bug or unexpected behavior → `systematic-debugging` before any fix — and
-  every defect a run targets gets a RECORDED reproduction before any code
-  changes: Playwright video/trace/screenshot for interaction bugs,
-  `diagnose-ui-glitch` for motion/timing defects, always-on screen-record
-  frames when the user already saw it live. Re-running the same recorded
-  steps after the fix is the user-level red-green proof; a bug without a
-  recorded repro doesn't enter the gate.
+- Bug or unexpected behavior → the bug-replication protocol, ALWAYS all
+  three together, before any fix:
+  1. **Screen-record recall** (Coast or equivalent) — pull the frames of
+     what the user actually saw: the incident as experienced, timestamps,
+     exact on-screen state.
+  2. **`diagnose-ui-glitch`** — drive the app and RECORD the reproduction
+     (.webm + first-bad-frame + time-aligned console/network signals); it
+     is the recording harness for every UI bug repro, not just flicker.
+  3. **`systematic-debugging`** — the method: reproduce → isolate →
+     root-cause; no behavior edits before the root cause is named.
+  Re-running the same recorded steps after the fix is the user-level
+  red-green proof; a bug without a recorded repro doesn't enter the gate.
+  (Non-UI bugs skip leg 2's browser recording and capture the repro as a
+  failing test or logged command run instead.)
 
 ## 2 · Execute — ONE step, one machine
 

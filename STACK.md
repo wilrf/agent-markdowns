@@ -37,7 +37,13 @@ ledger, it doesn't exist.
 
 - New feature or behavior change → `brainstorming`, then `writing-plans` for
   anything multi-step.
-- Bug or unexpected behavior → `systematic-debugging` before any fix.
+- Bug or unexpected behavior → `systematic-debugging` before any fix — and
+  every defect a run targets gets a RECORDED reproduction before any code
+  changes: Playwright video/trace/screenshot for interaction bugs,
+  `diagnose-ui-glitch` for motion/timing defects, always-on screen-record
+  frames when the user already saw it live. Re-running the same recorded
+  steps after the fix is the user-level red-green proof; a bug without a
+  recorded repro doesn't enter the gate.
 
 ## 2 · Execute — ONE step, one machine
 

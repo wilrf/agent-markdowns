@@ -51,6 +51,26 @@ at phase boundaries only. If state isn't in the ledger, it doesn't exist.
   A bug without a recorded repro doesn't enter the gate. (Non-UI bugs swap
   leg 2 for a failing test or logged command run.)
 
+## The command tree — model routing for every dispatch
+
+Pin `model` explicitly on EVERY fan-out; an unpinned subagent silently
+inherits the session model.
+
+| Tier | Model | Role |
+| ---- | ----- | ---- |
+| Command | Fable 5 (high) | Orchestrates + governs; never a worker |
+| Senior specialist | Opus 5 (high) | Adversarial + security review, hard debugging, shipping prose |
+| First workhorse | Codex Sol GPT-5.6 (xhigh, via codex-delegate) | Builds from tight specs; never below xhigh |
+| Menial agent | Sonnet 5 | Wide search, browser driving, mechanical sweeps |
+| Deterministic runner | Haiku 4.5 | Known-right-answer tasks + cheap search; output machine-checked |
+
+**Escalation spine — the most important decisions pass through Fable's
+hands, always.** Work flows down; load-bearing decisions flow up, and only
+the command tier disposes: gate definitions, ship/no-ship, architecture and
+schema choices, critical-finding adjudication, scope changes and rule
+exceptions, anything irreversible or outward-facing. Lower tiers decide
+freely inside their lane; Codex-vs-Opus disagreement auto-escalates.
+
 ## Stage 4 — Execute (ONE machine: engine + govern + delegate compose)
 
 - INVOKE `engine` (project-scoped version if the repo has one) — the spine:
@@ -72,11 +92,12 @@ at phase boundaries only. If state isn't in the ledger, it doesn't exist.
    local dev = build surface (full freedom, test auth); deployed prod =
    observe surface (READ-ONLY, user's own signed-in browser, confirm
    bug-before/fix-after only). Ledger records surface provenance.
-2. Adversarial review — INVOKE `code-review` (or `engine-review`);
-   adjudicate with `verifying-review-findings` where available; the
-   SECURITY LENS is mandatory (authz/authn, injection, data exposure —
-   `convex:convex-authz` for Convex backends; skip only for zero-attack-
-   surface changes, and say so).
+2. Adversarial review — INVOKE `code-review` (or `engine-review`), run on
+   Opus 5 per the command tree; adjudicate with `verifying-review-findings`
+   where available; the SECURITY LENS is mandatory (authz/authn, injection,
+   data exposure — `convex:convex-authz` for Convex backends; skip only for
+   zero-attack-surface changes, and say so). Critical findings escalate to
+   the command tier for disposition.
 3. INVOKE `simplify` on the changed code once it works and survives review.
 
 ## Stage 6 — Seal and close

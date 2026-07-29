@@ -136,6 +136,26 @@ The legs catch disjoint failure classes; none substitutes for another.
 Then, before claiming anything complete, fixed, or passing →
 `verification-before-completion`. Evidence before assertions, every time.
 
+## The command tree
+
+Model routing for every dispatch — pin the model explicitly on every fan-out:
+
+| Tier | Model class | Role |
+| ---- | ----------- | ---- |
+| Command | Apex judgment model (Fable-class, high) | Orchestrates + governs; never a worker |
+| Senior specialist | Second-smartest (Opus-class, high) | Adversarial + security review, hard debugging, shipping prose |
+| First workhorse | Frontier builder at max effort (Codex/GPT xhigh) | Implements from tight specs |
+| Menial agent | Mid-tier (Sonnet-class) | Wide search, browser driving, mechanical sweeps |
+| Deterministic runner | Small model (Haiku-class) | Known-right-answer tasks + cheap search; output machine-checked |
+
+**Escalation spine — the most important decisions pass through the command
+tier's hands, always.** Work flows down; load-bearing decisions flow up, and
+only command disposes: gate definitions, ship/no-ship, architecture and
+schema choices, critical-finding adjudication, scope changes and rule
+exceptions, anything irreversible or outward-facing. Lower tiers decide
+freely inside their lane; workhorse-vs-specialist disagreement
+auto-escalates.
+
 ## The through-line
 
 Memory first · thinking before building · the cheapest capable model doing

@@ -1,80 +1,54 @@
 # agent-markdowns
 
-A Claude Code plugin marketplace for autonomous, self-verifying agent work — the
-**agent-loops toolkit**.
+A Claude Code plugin marketplace for autonomous, self-verifying agent work.
 
-## The toolkit: one loop engine, four modes, two plugins
+Every skill runs the same loop: produce an artifact, verify it against a check that can
+**fail**, attack it adversarially, simplify, and repeat until "done" is machine-checkable.
 
-The loop is always the same — produce an artifact → verify it against something that can
-**fail** → adversarially attack it → simplify → iterate to a machine-checkable done. Only the
-bindings change per mode. All four modes ship in **one plugin** (`engine`); the accumulated
-operating manual ships in a second (`agent-loops`) you install alongside for the depth.
+## Plugins
 
-| Plugin | Ships | What it's for |
-| ------ | ----- | ------------- |
-| **`engine`** | four skills | The build mode plus its three sibling modes — one install, no à-la-carte. |
-| **`agent-loops`** | foundation | The operating manual every mode rests on — the playbook + the `goal-template`. Install alongside. |
+| Plugin | Skills | What it's for |
+| ------ | ------ | ------------- |
+| **`stack`** | `stack` | One entry point (`/stack <task>`) that runs the full pipeline: recall, git discipline, ledger, shaping, the engine, and the quality tripod. |
+| **`engine`** | `engine`, `engine-review`, `engine-audit`, `engine-planning`, `engine-infra`, `goal` | The build loop and its modes (see below). |
+| **`ledger`** | `ledger` | A `<task>-progress.md` file as the source of truth, so state survives context loss. |
+| **`user-walkthrough`** | `user-walkthrough` | Drive the running app like a real user (Playwright) before you call a feature done. |
+| **`diagnose-ui-glitch`** | `diagnose-ui-glitch` | Record a `.webm` of a flicker or timing bug, find the first bad frame, and prove the fix. |
+| **`codex-delegate`** | `codex-delegate` | Hand a tightly specified slice to the Codex CLI, then review the diff and run the gate. |
+| **`playbooks`** | `spec-review`, `spec-verify`, `bug-hunt`, `bug-fix`, `architecture-doc`, `vibe-audit` | Manual-only playbooks. They never auto-trigger; call them by name. |
+| **`agent-loops`** | `engineering-agent-loops` | The reference manual for loop design: the playbook and the goal template. |
+| `orchestration` | `govern`, `liaison` | **Archived.** Only for csa-new. Manual-only. |
 
-Inside the `engine` plugin, the four mode skills:
+### Engine modes
 
-| Skill | Mode | Artifact | Gate that can fail | Trigger |
-| ----- | ---- | -------- | ------------------ | ------- |
-| **`engine`** | build | code | tests / types / lint / smoke | `/engine`, or "run the engine on…" |
-| **`engine-review`** | review | findings | refute-panels + mandatory repros | "audit / security review / find bugs in…" |
-| **`engine-planning`** | plan | spec/plan | grounding checks + premortem | "plan this / design a spec before coding" |
-| **`engine-infra`** | infra | system state | parity harness, dry-run diff, canary, rehearsed rollback | "migrate / deploy / backfill safely" |
+| Skill | Artifact | Gate that can fail | Trigger |
+| ----- | -------- | ------------------ | ------- |
+| `engine` | code | tests / types / lint / smoke | `/engine`, "run the engine on…" |
+| `engine-review` | verdict on a change | refute-panel of lens reviewers | `/engine-review`, the stack's review leg |
+| `engine-audit` | findings | refute-panels + mandatory repros | "audit / security review / find bugs in…" |
+| `engine-planning` | spec / plan | grounding checks + premortem | "plan this / design a spec before coding" |
+| `engine-infra` | system state | parity harness, dry-run diff, canary, rehearsed rollback | "migrate / deploy / backfill safely" |
+| `goal` | the DONE block | met / unmet with evidence | `/goal` |
 
-`engine` is directly invocable via `/engine`; the three mode skills fire on their own trigger
-phrases (above). All four are **richer with `agent-loops` installed alongside** — their skills
-reference its playbook for the full method.
+## Model routing
 
-## Layout
-
-```
-plugins/
-├── engine/                       # all four modes, one plugin
-│   skills/
-│   ├── engine/           SKILL.md + templates/engine-template.md      (build, /engine)
-│   ├── engine-review/    SKILL.md + templates/review-template.md
-│   ├── engine-planning/  SKILL.md + templates/planning-template.md
-│   └── engine-infra/     SKILL.md + templates/infra-template.md
-└── agent-loops/                  # the foundation
-    skills/engineering-agent-loops/
-      SKILL.md
-      references/agent-loops-playbook.md   # the accumulated judgment
-      templates/goal-template.md           # build-goal stations
-```
-
-Three layers, three lifespans: a **skill** routes (per-trigger), the **playbook** accumulates
-(per-repo, grows over time), and your task **ledger** stages (per-task) — the layering that
-survives context compaction. The playbook is the distillation of real autonomous runs — among
-them a 7-phase semantic-search + RAG build (~4,900 lines across schema, indexing, embeddings,
-retrieval, backfill, frontend, monitoring) whose adversarial verify panel caught a real bug
-**every phase**, including two security issues no compiler, lint, or test could see — plus an
-overnight-lane night-shift retro and a multi-PR harvest off a moved base branch.
+The skills name **roles**, not model versions: the main session commands, `opus` reviews,
+the newest GPT (through Codex) builds, `sonnet` sweeps, and `haiku` runs deterministic checks.
+Always pin `model` on a fan-out, because an unpinned subagent inherits the session model.
 
 ## Install
 
 ```sh
-# Add this marketplace
 /plugin marketplace add wilrf/agent-markdowns
-
-# The engine (all four modes) + the foundation playbook
+/plugin install stack@agent-markdowns
 /plugin install engine@agent-markdowns
-/plugin install agent-loops@agent-markdowns   # recommended — the deep method
 ```
 
-## Use
+To edit the skills in place, symlink them into `~/.claude/skills/` instead:
 
+```sh
+ln -s ~/agent-markdowns/plugins/engine/skills/engine ~/.claude/skills/engine
 ```
-/engine <your task>          # build mode — directly invocable
-```
-
-…or just **describe the work** and the right mode triggers on its own: "audit this for
-security" → `engine-review`, "plan the X feature first, don't code" → `engine-planning`,
-"migrate this table safely" → `engine-infra`. `/engine` and the `engineering-agent-loops`
-skill are directly invocable; the review / planning / infra skills fire on their trigger
-phrases.
 
 ## License
 

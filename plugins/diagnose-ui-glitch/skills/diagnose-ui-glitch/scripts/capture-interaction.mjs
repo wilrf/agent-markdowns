@@ -59,6 +59,36 @@ async function executeStep({ page, step, baseAt, events, domDir }) {
     case "type":
       await locatorFor(page, step).fill(step.text, { timeout: 10_000 });
       return stamp({ target: step.selector ?? step.name });
+    case "pressSequentially":
+      // Faithful human typing: one key at a time with a delay, so per-keystroke
+      // re-renders (and any focus loss between them) actually occur. Unlike `fill`,
+      // this does not re-focus on every char.
+      await locatorFor(page, step).pressSequentially(step.text, {
+        delay: step.delayMs ?? 120,
+        timeout: 15_000,
+      });
+      return stamp({ target: step.selector ?? step.name, text: step.text });
+    case "press":
+      // Single key / chord at the page level (e.g. "Meta+k" to open a palette).
+      await page.keyboard.press(step.key);
+      return stamp({ key: step.key });
+    case "snapshotFocus": {
+      // Record the currently-focused element on the shared clock. The proof signal
+      // for focus-loss bugs: if this stops matching the input mid-type, focus was stolen.
+      const active = await page.evaluate(() => {
+        const el = document.activeElement;
+        if (!el) return null;
+        return {
+          tag: el.tagName.toLowerCase(),
+          id: el.id || null,
+          dataSlot: el.getAttribute("data-slot"),
+          placeholder: el.getAttribute("placeholder"),
+          ariaLabel: el.getAttribute("aria-label"),
+          value: "value" in el ? String(el.value).slice(0, 60) : null,
+        };
+      });
+      return stamp({ label: step.label, activeElement: active });
+    }
     case "mark":
       return stamp({ label: step.label });
     case "snapshotDom": {

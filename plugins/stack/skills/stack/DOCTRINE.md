@@ -142,7 +142,7 @@ Model routing for every dispatch — pin the model explicitly on every fan-out:
 
 | Tier | Model class | Role |
 | ---- | ----------- | ---- |
-| Command | Apex judgment model (Fable-class, high) | Orchestrates + governs; never a worker |
+| Command | the main session | Orchestrates + governs; never a worker |
 | Senior specialist | Second-smartest (Opus-class, high) | Adversarial + security review, hard debugging, shipping prose |
 | First workhorse | Frontier builder at max effort (Codex/GPT xhigh) | Implements from tight specs |
 | Menial agent | Mid-tier (Sonnet-class) | Wide search, browser driving, mechanical sweeps |

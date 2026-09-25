@@ -60,6 +60,27 @@ a user types), assert the outcome at the END of the flow (the data shows up,
 the state persists after a reload), and capture one screenshot at the
 decisive moment. Mark the checklist item pass/fail with a one-line note.
 
+## 2.5 · What a valid outcome assertion IS
+
+Every workflow's pass/fail is judged by an assertion with all four parts:
+
+1. **Content, not container.** Assert the thing the user came for — the
+   specific rows, IDs, values, or answer text expected for THIS input.
+   A wrapper that also renders while loading, empty, or failed (a heading,
+   panel, toast, spinner) proves nothing.
+2. **Terminal state.** Wait for the flow's end state (answered / saved /
+   rejected), then assert. An assertion that can pass mid-flight is invalid.
+3. **Pinned surface.** The assertion runs on the exact surface the claim is
+   about, and asserts the app's version/flag marker when one exists (e.g. a
+   `data-*` version attribute). A pass on dev proves dev; the claim "works
+   in production" requires a pass against the production bundle.
+4. **Seen red.** Before trusting its first green, watch the assertion fail —
+   run it against the known-broken state, or falsify the expectation once.
+   A check that has never said "no" is not yet a check.
+
+A workflow verified by an assertion missing any part is UNVERIFIED — mark it
+as such in the ledger and report.
+
 ## 3 · The edge-case battery
 
 Run against the feature's main surface. Skip an item only with a stated

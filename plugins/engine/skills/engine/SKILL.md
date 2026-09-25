@@ -1,38 +1,18 @@
 ---
 name: engine
-description: The autonomous build engine. Use when the user says "use the engine for this", "run the engine on …", "/engine", or asks for an autonomous / long-horizon build that should design its own checks and verify its own work before handing back. Also fires for designing or running ANY autonomous loop — "set up a loop", "run this overnight", "let it iterate until…", "fan out agents", "create a workflow to…", a maker/checker pair, worktree parallelism, or any task whose done-condition you intend to express as a machine-checkable condition. Given any task, you understand the intent, DESIGN A GATE that can prove it done (and can fail), get the human's sign-off on the target, then build and self-verify against that gate until green — stopping at a committed slice. Carries the full loop discipline inline (gate design, the ledger, verify panel, fan-out, context budgeting, retro) so it is self-sufficient for multi-day build runs. The review / plan / infra modes ship alongside this skill as the `engine-review` / `engine-planning` / `engine-infra` skills (same plugin — they fire on their own triggers, no extra install); add the companion `agent-loops` plugin for the full operating-manual playbook.
+description: The autonomous build engine. Use when the user says "use the engine for this", "run the engine on …", "/engine", or asks for an autonomous / long-horizon build that should design its own checks and verify its own work before handing back. Given any task, you understand the intent, DESIGN A GATE that can prove it done (and can fail), set its own target, then build and self-verify against that gate until green — committing and pushing a focused slice without ever pausing for permission. It stops only at a genuine wall it cannot legitimately pass, and never fakes one. Carries the full loop discipline inline (gate design, verify panel, fan-out, context budgeting, retro) so it is self-sufficient for multi-day runs.
 user-invocable: true
 ---
 
 # The Engine
 
 One entrypoint for autonomous, self-verifying builds. Given any task you: understand
-the intent → **design a gate that can prove it done and can fail** → get the human's
-yes on the target → build and self-verify against that gate until green → hand back a
-committed slice. This skill is **self-sufficient for long autonomous runs** — it carries
-the gate-design, verify-panel, fan-out, context-budgeting and retro discipline inline.
-
-**Deeper reference.** The build pipeline below is the fast path and is self-sufficient for a
-build. The other three modes ship **alongside this skill in the same plugin** and fire on
-their own triggers — nothing extra to install:
-- **`engine-review`** — findings as the product (audits, security sweeps): refute-panels,
-  mandatory repros, loop-until-dry with an honest coverage map.
-- **`engine-planning`** — a spec/plan as the artifact: grounding checks, a premortem panel,
-  every phase names its gate; emits a machine-checkable plan this build mode consumes.
-- **`engine-infra`** — system state (migrations, deploys, backfills): the guardrail harness
-  (parity, dry-run diff, canary, rehearsed rollback) comes *before* the change.
-
-For the full operating manual — the accumulated-judgment playbook, field notes, and the
-`goal-template` station skeleton — install the companion **`agent-loops`** plugin (read it
-before designing a non-build loop or any unusually large run). This plugin also bundles
-[`templates/engine-template.md`](templates/engine-template.md) — the engine parameterized for
-your repo.
-
-**Quick gut-check before you loop:** (1) is there a command that can actually **fail**? no gate =
-no loop. (2) is "done" an exit code / checked artifact, not a vibe? (3) dynamic `Workflow` → did
-the user explicitly opt in? (4) is the iteration count **capped**? (5) does it respect the repo's
-HARD RULES (ports, push flags, prod env)? (6) will it outlive a context window → ledger on disk,
-`/compact` at phase boundaries. (7) does the goal include the **retro** before declaring done?
+the intent → **design a gate that can prove it done and can fail** → set your own
+target → build and self-verify against that gate until green → commit and push a focused
+slice — running end-to-end **without pausing for permission**, stopping only at a genuine
+wall you cannot legitimately pass. This skill is **self-sufficient for long autonomous
+runs** — it carries the gate-design, verify-panel, fan-out, context-budgeting and retro
+discipline inline.
 
 **Bind to the active project first.** The engine is project-agnostic; its gate is not.
 Before designing anything, read the active repo's contract — `CLAUDE.md` / `AGENTS.md`,
@@ -50,8 +30,9 @@ The engine has **no fixed gate.** For each task *you* design the checks that pro
   design is that it **rejects a wrong answer** (a planted error trips it). If it can't
   fail, it isn't a gate.
 - The risk in a self-verifying engine isn't bugs (the gate catches those) — it's a
-  confidently-verified **wrong target**. The human approves the *target*; hitting it is
-  yours. Garbage-in is the failure mode, not bugs.
+  confidently-verified **wrong target**. You own the target now — so manage that risk:
+  state the DONE block explicitly, log it to the ledger before you build, and make sure the
+  gate can reject a wrong answer. Garbage-in is the failure mode, not bugs.
 - **Scaffolding is temporary — the harness is not precious.** Every check, panel, station,
   and subagent here is scaffolding that corrects for *today's* model's errors; as models
   improve they outgrow it (Claude Code's own team deletes large chunks of its prompt/tooling
@@ -63,27 +44,33 @@ The engine has **no fixed gate.** For each task *you* design the checks that pro
 
 ## The autonomy contract
 
-On Gate-1 approval, set `/goal <approved DONE>` and run to green **without soft stops.**
-The ONLY interruptions:
+This skill **never asks for permission.** The instant you understand the task, SET THE
+GOAL — INVOKE `goal` with the DONE condition (it writes the binding DONE block into the
+ledger; the ledger block IS the goal) — and run all the way to a green, committed,
+**pushed** slice **without a single soft stop.** There is no target sign-off and no done-handoff pause — you design the
+target, log it, build it, verify it, and push it. The ONLY interruptions are genuine walls,
+never permission:
 
-- **GATE 1 (target)** — up front, before any build.
-- **GATE 2 (done)** — green + committed focused slice; the human decides
-  push / PR / merge / deploy.
-- **HARD BLOCKER** — a check that can't legitimately pass (auth/preflight fail, a fixed
-  port already taken, a prod-env / force-push / project-forbidden operation). Try every
-  legitimate path first, then surface loudly. Never fake a green, never bypass an auth
-  gate, never edit ports/env/secrets to dodge it.
+- **HARD BLOCKER** — a check that *cannot legitimately pass* (auth/preflight fail, a fixed
+  port already taken, a prod-env / force-push / project-forbidden operation). This is not
+  asking permission — it's refusing to lie. Try every legitimate path first, then surface
+  loudly *with* ledger state. Never fake a green, never bypass an auth gate, never edit
+  ports/env/secrets to dodge it. Stopping honestly beats a false "done."
 - **SAFETY CAP** — a runaway loop surfaces *with* ledger state; never a silent give-up.
+- **IRREVERSIBLE / DESTRUCTIVE FORK** — a data migration, a public API or contract change,
+  an added dependency, deleting another lane's work, anything outward-facing or hard to
+  undo. Surface with a recommendation because the cost of being wrong is unrecoverable —
+  not because you need a yes.
 
-**Decide vs. surface — the autonomy boundary.** Between the gates you *own every reversible
-call*: implementation details, naming, which helper, local refactors — decide it, log it,
-keep moving; asking would just be noise. **Surface** a fork only when it (a) changes the
-approved target / DONE, (b) is hard to reverse — a data migration, a public API or contract,
-an added dependency, anything destructive or outward-facing — or (c) trades a value the human
-owns (security / privacy posture, cost, product behavior) with no obviously-right answer.
-When you must surface mid-run, bring a recommendation + the alternatives, not an open
-question. Auto-deciding an (a)/(b)/(c) fork to "keep the run going" is the failure mode, not
-the speed-up.
+**Decide vs. surface — the autonomy boundary.** From start to pushed slice you *own every
+reversible call and the target itself*: implementation, naming, which helper, local
+refactors, what "done" means — decide it, log it, keep moving; asking would just be noise.
+**Surface** a fork only when it (a) is hard to reverse — a data migration, a public API or
+contract, an added dependency, anything destructive or outward-facing — or (b) trades a
+value the human owns (security / privacy posture, cost, product behavior) with no
+obviously-right answer. Even then, bring a recommendation + the alternatives, not an open
+question, and never block on routine permission. Auto-deciding an (a)/(b) fork "to keep the
+run going" is one failure mode; pausing for a reversible call is the opposite one.
 
 Fix at **root cause**: never suppress a check (no lint-disable, no type-escape hatch like
 `any`/`# type: ignore`) to make it pass. Invoking the engine IS the standing `Workflow`
@@ -95,7 +82,7 @@ work is "complete" once the unblockable part is done and the blocker is written 
 ledger. Close at the achievable frontier; move to the next phase. Never spin on a gate
 you can't legitimately pass, never fake one.
 
-## The pipeline — 4 stages, 2 gates
+## The pipeline — 4 stages, no permission gates
 
 **STAGE 0 — UNDERSTAND & DESIGN THE GATE**
 - Read intent, scope, route mode(s). **CLASSIFY**: deterministic (a machine check can
@@ -103,8 +90,9 @@ you can't legitimately pass, never fake one.
 - Scale to size: quick confirm for small; full `superpowers:brainstorming` for large.
 - Write a machine-checkable **DONE block** (acceptance as exit codes / checked artifacts).
 - **DESIGN THE GATE** that proves it (see "Designing the gate").
-- **╞═ GATE 1:** present the DONE block + the gate; get the human's yes on the TARGET. ═╡
-- On approval: `/goal <DONE>`, create the ledger.
+- Set the goal (INVOKE `goal` — it writes the ledger DONE block), log the target + the
+  designed gate to the ledger, and proceed — no
+  sign-off pause. The target is yours; the gate's ability to **fail** is what protects it.
 
 **STAGE 1 — PLAN** — planning is the **highest-ROI scaffold there is**: a written plan is
 reportedly the difference between a medium task landing ~20–30% of the time and ~70–80% of
@@ -126,11 +114,8 @@ built at write-time, not bolted on in review:
 - **Reuse before you add** — search for an existing helper / type / pattern and extend it
   before spawning a parallel one. A new abstraction needs a second caller or a real boundary
   to earn its keep; speculative "for later" generality is debt, not foresight.
-- **Fewest *readable* lines — simplify, don't golf.** Fewer lines means *less code*, not the
-  same code crammed onto fewer lines — readability wins every tie. Delete rather than comment
-  out; smallest diff that does the job; remove the code you replaced (no dead branches, no
-  commented-out husks). The simplest version that works is the target — reach for it at
-  write-time, not in a bolted-on cleanup pass.
+- **Fewest readable lines** — delete don't golf; smallest diff that does the job; remove the
+  code you replaced (no dead branches, no commented-out husks).
 - **Test-first where the gate needs a check that doesn't exist** (TDD): write the failing
   test, watch it fail, then make it pass.
 - Fan out builders for large work (see "Fan-out"). Update the ledger **before** each commit.
@@ -139,10 +124,11 @@ built at write-time, not bolted on in review:
 user journey after **every** fix (not "the last error is gone" — layered failures hide
 behind each other). Run the adversarial panel (see "The verify panel").
 
-**STAGE 4 — RETRO + COMMIT** — promote ledger traps (see "Retro"); ONE commit of the focused
-slice made with **explicit pathspecs** (`git commit -- <path> …`), never `git add -A` — a
-shared checkout may hold another lane's dirty files and `-A` bundles them into your commit.
-- **╞═ GATE 2:** stop. Green + committed, waiting on the human's go. ═╡
+**STAGE 4 — RETRO + COMMIT + PUSH** — promote ledger traps (see "Retro"); ONE **pathspec**
+commit of the focused slice (never bundle others' dirty files), then plain `git push` of
+that branch. Report done with the ledger summary — no pause.
+- PR / merge / deploy stay **out of scope**: those pull other people in, so leave them to
+  the human. This is a boundary on what the engine ships, not a permission stop.
 
 ## Designing the gate (the heart of the engine)
 
@@ -163,7 +149,7 @@ assume them.**
   documented filter rather than fighting it.
 - **Do NOT use a production build as a local gate** unless the project says to — a prod
   build typically validates prod env/secrets and fails locally for reasons unrelated to
-  your change. Production build is a CI concern *past* Gate 2.
+  your change. Production build is a CI concern *past* the pushed slice, not a local gate.
 
 **New behavior with no check** → write the failing test first, watch it fail, then pass it.
 **User-journey changes** → run the project's end-to-end / smoke path (e.g. an auth
@@ -172,9 +158,22 @@ and that's unavailable, STOP and ask for the human's re-auth/setup protocol — 
 it. The smoke is **load-bearing**: unit tests that mock a dependency away are structurally
 blind to that dependency's integration bugs.
 
+**Browser-leg assertions** (any user-journey check) follow the four-part contract in
+`user-walkthrough` §2.5: assert the content the user came for (specific rows / IDs /
+answer text — never a container that also renders while loading, empty, or failed),
+wait for the flow's terminal state before asserting, and pin the surface — the check
+runs against the exact bundle the claim is about, asserting the app's version/flag
+marker when one exists. Green on dev proves dev, never the deployed claim.
+
 **Prove the gate can fail** before trusting it (a planted type error trips the type-check;
-a planted visual break is caught by the visual pass). A gate you haven't seen say "no"
-isn't yet a gate.
+a planted visual break is caught by the visual pass; a browser assertion is run once
+against the known-broken state or a falsified expectation). A gate you haven't seen say
+"no" isn't yet a gate.
+
+**Anchor red-green on fast-evaluable fixtures.** A gate check must never sit behind a slow
+data repair: seed one fixture the live path can process in seconds rather than waiting on a
+multi-hour corpus walk; the slow repair gets its own non-blocking verification check off
+the red-green critical path.
 
 ## Deterministic vs non-deterministic work
 
@@ -209,30 +208,14 @@ each toward "refuted/failing unless proven otherwise."
   ~1 in 3 minor findings collide with reality. Check each proposed change against the real
   gate; log every rejection + rationale to the ledger's **"do-NOT-re-raise"** list and
   paste that list into the next panel prompt.
-- **Re-verify the *fix*, refute-biased.** A confirm-biased pass ("does this look fixed?")
-  ships wrong root causes. When a finding drives a change, run one more pass prompted to
-  *refute the fix* — "prove this didn't actually address it; prove the severity is wrong." A
-  real run had exactly this re-pass overturn both a wrong root cause and a wrong severity that
-  the confirm-biased first pass had blessed.
 - **Pin the verifier model** on orchestrated/`Workflow` agents — a panel that silently
-  errors is indistinguishable from one that found nothing (and, per fan-out above, an
-  unpinned one also burns the expensive tier).
+  errors is indistinguishable from one that found nothing.
 
 ## Fan-out & workflows
 
 Reserve fan-out for genuinely large work (many files, audits, migrations); for a small
 task a dynamic `Workflow` is just an expensive single agent. When you do fan out:
 
-- **Pin the model — and the effort — on every fan-out.** Subagents inherit the *session*
-  model by default, so an unpinned fan-out from an expensive session silently spawns
-  expensive workers — the #1 budget leak. Pin each agent to the cheapest tier that can do
-  its slice; reserve the expensive tier for the hard verify/judge kernels, and raise effort
-  per-agent for a genuinely hard sub-problem rather than raising it globally.
-- **Isolate parallel *writers*.** Agents writing in parallel on one shared, dirty checkout
-  clobber each other — and can *revert uncommitted WIP* with a stray `git checkout` / `restore`
-  (unrecoverable; not in git history, not in the editor's undo). Give each writer its own git
-  worktree (`isolation: 'worktree'`), or forbid destructive git in its prompt and have it
-  return a diff. Read-only verifiers can safely share the tree.
 - **`pipeline()` by default** — items flow through stages with no barrier; only use a
   barrier (`parallel()`) when a stage genuinely needs ALL prior results at once (dedup,
   early-exit on zero, cross-item comparison).
@@ -252,23 +235,30 @@ free). Engineer for it:
 
 - **Ledger-first** — the ledger (below) is the source of truth; the conversation is
   scratch. If state isn't in the ledger, it doesn't exist.
-- **`/compact` at phase boundaries only** — right after commit + ledger update (zero
-  in-flight state). Never mid-edit.
+- **Compaction at phase boundaries only** — right after commit + ledger update (zero
+  in-flight state). Never mid-edit. The agent cannot invoke `/compact` itself: suggest it
+  to the human in interactive runs; autonomously, keep the ledger compaction-ready and
+  trust auto-summarization.
+- **Reads are spend too** — any read over ~200 lines goes to a reader subagent that
+  returns conclusions, not file dumps; a post-review fix round exceeding ~5 edits becomes
+  a new delegate slice, not in-session surgery (surgical exceptions compound into a
+  burned window).
 - **Session-per-phase ratchet (multi-day scale)** — run each phase as a fresh session or
   headless `claude -p` whose contract is: read ledger → do the next unchecked phase → run
-  gates → commit → update ledger. `/goal` works in `-p`, so each phase can carry its own
-  completion condition.
+  gates → commit → update ledger. Each phase carries its own completion condition in the
+  ledger; a `-p`/SDK DRIVER can additionally send literal `/compact [focus]` (a documented
+  SDK input) between phases — the one environment where boundary compaction is real.
 - **Fan out builders, not just verifiers** — inline building is the biggest context burner
   (every Read/Edit lands in the main window); for large phases delegate the writes too.
 
 ## Nesting
 
-The engine's `/goal` is the outermost ring; phases nest under it, verify rounds under
-phases, per-finding refute loops under those. Three rules: every level has its own
-done-condition; inner iterations are cheaper than outer; a stuck inner loop **fails UP**
-with its ledger state (never improvises a different approach — that's the parent's call).
-Subagents can't type `/goal`; give them a goal by writing the DONE + stations into their
-prompt — the parent's goal evaluator waits for them before judging "met?".
+The engine's goal (the ledger DONE block) is the outermost ring; phases nest under it,
+verify rounds under phases, per-finding refute loops under those. Three rules: every level
+has its own done-condition; inner iterations are cheaper than outer; a stuck inner loop
+**fails UP** with its ledger state (never improvises a different approach — that's the
+parent's call). Give subagents their goal by writing the DONE + stations into their
+prompt — the parent waits for them before judging "met?".
 
 ## Anomaly triggers — noticing (stop-and-log to the ledger the instant one fires)
 
@@ -279,15 +269,11 @@ goes green on empty arrays. **Every mocked boundary** must name the station that
 the real thing; one with none is a ledger-recorded gap, not a shrug. At phase end, sketch
 the verification matrix (paths × real-vs-mocked × envs) and list the unexercised cells.
 
-## The ledger — the run's spine (`<plans-dir>/<task>-progress.md`, created at Gate 1)
+## The ledger (`<plans-dir>/<task>-progress.md`, created in STAGE 0)
 
-**This is the single most important discipline in the engine.** The ledger is the source of
-truth; the conversation is scratch. **If it isn't in the ledger, it doesn't exist** — a run
-whose ledger has gone stale is one you cannot resume, `/compact`, or trust. Update it
-**before every commit** and at every phase boundary, and keep it complete enough that a fresh
-session with zero context could read it and pick the run up cold. Put it where the project
-keeps plans (e.g. `.claude/plans/`) or alongside the work. Sections:
-- **Goal / DONE block** (the approved target) and **the designed gate**
+Source of truth; updated **before every commit**; survives compaction. Put it where the
+project keeps plans (e.g. `.claude/plans/`) or alongside the work. Sections:
+- **Goal / DONE block** (the target you set) and **the designed gate**
 - **Phase status** (per phase: todo / done / blocked-with-reason)
 - **Decisions made** (with the alternatives rejected and why) · **Findings REJECTED with rationale** (the "do-NOT-re-raise" list)
 - **Anomalies** (expected X, observed Y) · **environment facts** · **unexercised cells**

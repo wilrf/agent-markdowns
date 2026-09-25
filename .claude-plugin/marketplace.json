@@ -5,8 +5,8 @@
     "name": "wilrf"
   },
   "metadata": {
-    "description": "Agent skill markdowns for Claude Code — the agent-loops toolkit: the engine plugin (build / review / plan / infra modes as engine-* skills) plus the agent-loops foundation playbook, for autonomous, self-verifying agent work, and standalone diagnostic tools.",
-    "version": "2.0.0",
+    "description": "Wil's Claude Code operating stack: the engine (build, review, audit, plan, infra), the stack pipeline, the ledger, user walkthroughs, UI-glitch forensics, Codex delegation, and manual-only playbooks.",
+    "version": "3.0.0",
     "license": "MIT",
     "repository": "https://github.com/wilrf/agent-markdowns"
   },
@@ -23,8 +23,8 @@
     {
       "name": "engine",
       "source": "./plugins/engine",
-      "description": "The autonomous engine — all four modes in one plugin. Build (`engine`, /engine-invocable): design a gate that can prove a task done and can fail, get human sign-off on the target, then build and self-verify until green, stopping at a committed slice. Plus three sibling mode skills that fire on their own triggers: `engine-review` (findings as the product — refute-panels, mandatory repros, loop-until-dry), `engine-planning` (a machine-checkable spec/plan — grounding checks, premortem, every phase names its gate), `engine-infra` (system state — guardrail harness first: parity, dry-run diff, canary, rehearsed rollback). Install agent-loops alongside for the deep playbook.",
-      "version": "2.0.0",
+      "description": "The autonomous engine. `engine` (/engine): design a gate that can prove a task done and can fail, then build and self-verify until green. Siblings: `engine-review` (the adversarial review panel), `engine-audit` (findings as the product), `engine-planning` (a machine-checkable plan), `engine-infra` (migrations and deploys behind a guardrail harness), and `goal` (set or check the run's DONE condition).",
+      "version": "3.0.0",
       "author": {
         "name": "wilrf"
       }
@@ -41,7 +41,7 @@
     {
       "name": "orchestration",
       "source": "./plugins/orchestration",
-      "description": "Governor/Liaison split for multi-lane agent phases: `govern` opens the policy-and-sequencing authority (read-only inspection, docs-only writes, receipt audits); `liaison` runs one lane's mechanics (worktrees, build dispatch, gates, commits, PRs) and can never merge to main. Extracted verbatim from csa-new 2026-07-29; repo-specific paths and policies need adapting for other projects.",
+      "description": "[ARCHIVED — csa-new only] Governor/Liaison split for multi-lane agent phases: `govern` opens the policy-and-sequencing authority (read-only inspection, docs-only writes, receipt audits); `liaison` runs one lane's mechanics (worktrees, build dispatch, gates, commits, PRs) and can never merge to main. Extracted verbatim from csa-new 2026-07-29; repo-specific paths and policies need adapting for other projects.",
       "version": "1.0.0",
       "author": {
         "name": "wilrf"
@@ -69,6 +69,24 @@
       "name": "ledger",
       "source": "./plugins/ledger",
       "description": "Working-memory discipline for any multi-phase task: keep a <task>-progress.md ledger as the source of truth, update it before every commit, /compact only at phase boundaries, resume via read-ledger → next phase → gates → commit → update. Distilled from the engine so it composes with any execution mode.",
+      "version": "1.0.0",
+      "author": {
+        "name": "wilrf"
+      }
+    },
+    {
+      "name": "codex-delegate",
+      "source": "./plugins/codex-delegate",
+      "description": "Delegate a tightly specified implementation slice to the Codex CLI (newest GPT) — spec, execute in a sandbox, review the diff, run the gate. Includes a read-only advisor mode for second opinions.",
+      "version": "1.0.0",
+      "author": {
+        "name": "wilrf"
+      }
+    },
+    {
+      "name": "playbooks",
+      "source": "./plugins/playbooks",
+      "description": "Six manual-only review and repair playbooks: spec-review, spec-verify, bug-hunt, bug-fix, architecture-doc, vibe-audit. They never auto-trigger, so they cost no context until you call one by name.",
       "version": "1.0.0",
       "author": {
         "name": "wilrf"

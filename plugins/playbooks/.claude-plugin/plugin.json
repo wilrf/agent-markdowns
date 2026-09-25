@@ -1,0 +1,6 @@
+{
+  "name": "playbooks",
+  "version": "1.0.0",
+  "description": "Six manual-only review and repair playbooks: spec-review, spec-verify, bug-hunt, bug-fix, architecture-doc, vibe-audit. They never auto-trigger, so they cost no context until you call one by name.",
+  "author": { "name": "wilrf" }
+}

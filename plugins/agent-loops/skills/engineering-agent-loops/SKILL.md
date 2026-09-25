@@ -1,6 +1,6 @@
 ---
 name: engineering-agent-loops
-description: Use when designing or running anything that iterates without a human in the inner loop — a /loop, a dynamic Workflow fan-out, an overnight headless `claude -p` run, a maker/checker subagent pair, worktree parallelism, or any task whose "done"/goal you intend to express as a machine-checkable condition. Triggers on "set up a loop", "run this overnight", "create a workflow to…", "let it iterate until…", "goal/done-condition", "fan out agents", "parallelize with worktrees".
+description: The reference manual for loop design — how to structure a /loop, a dynamic Workflow fan-out, a headless `claude -p` run, a maker/checker subagent pair, or worktree parallelism. Use when DESIGNING a loop's shape ("set up a loop", "create a workflow to…", "fan out agents", "parallelize with worktrees"). Not for running a build (use engine) or setting the done condition (use goal).
 user-invocable: true
 ---
 
@@ -23,7 +23,7 @@ marketplace; installing it gives you all of them:
 | Mode | Skill (in the `engine` plugin) | Artifact | Gate that can fail |
 | ---- | ------------------------------ | -------- | ------------------ |
 | **Build** | `engine` | code | tests / types / lint / smoke |
-| **Review** | `engine-review` | findings | refute-panels + repros |
+| **Audit** | `engine-audit` | findings | refute-panels + repros |
 | **Plan** | `engine-planning` | spec/plan | grounding checks + premortem |
 | **Infra** | `engine-infra` | system state | dry-run diff, parity harness, canary, rehearsed rollback |
 

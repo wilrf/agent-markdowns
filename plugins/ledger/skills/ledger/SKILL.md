@@ -1,6 +1,6 @@
 ---
 name: ledger
-description: Working-memory discipline for any multi-phase task — keep a <task>-progress.md ledger as the source of truth, update it before every commit, and /compact only at phase boundaries so state survives context loss. Use whenever a task will span multiple phases, sessions, or context windows, or when the user says "keep a ledger", "take notes on this", or work resumes after a compaction/clear.
+description: Working-memory discipline for any multi-phase task — keep a <task>-progress.md ledger as the source of truth, update it before every commit, and keep it compaction-ready so state survives context loss (compaction lands at phase boundaries; the human or an SDK driver triggers it, never the agent). Use whenever a task will span multiple phases, sessions, or context windows, or when the user says "keep a ledger", "take notes on this", or work resumes after a compaction/clear.
 user-invocable: true
 ---
 
@@ -42,9 +42,18 @@ directory). Sections:
   a commit whose state isn't in the ledger is a future archaeology project.
 - **Update the instant an anomaly fires** — stop-and-log beats reconstruct-
   later.
-- **`/compact` at phase boundaries ONLY** — right after commit + ledger
-  update, when there is zero in-flight state. Never mid-edit, never mid-
-  debug. The ledger is what makes the compaction safe.
+- **Compaction happens at phase boundaries ONLY** — right after commit +
+  ledger update, when there is zero in-flight state. Never mid-edit, never
+  mid-debug. The ledger is what makes the compaction safe. Mechanics: the
+  agent CANNOT invoke `/compact` itself — in interactive sessions, SUGGEST
+  it to the human at the boundary; in autonomous runs, keep the ledger
+  compaction-ready and trust auto-summarization to land on it; headless/
+  SDK drivers CAN send literal `/compact [focus]` between phases (a
+  documented SDK input) — the one place boundary compaction is automatable.
+- **Shape what compaction keeps**: the compactor honors a "Compact
+  Instructions" section in CLAUDE.md — have it always preserve the ledger
+  path, the gate/DONE block, and the do-NOT-re-raise list, so even an
+  unplanned auto-compact lands on the ledger.
 
 ## Resuming (fresh session, post-compact, or handoff)
 

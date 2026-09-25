@@ -1,0 +1,6 @@
+{
+  "name": "codex-delegate",
+  "version": "1.0.0",
+  "description": "Delegate a tightly specified implementation slice to the Codex CLI (newest GPT) — spec, execute in a sandbox, review the diff, run the gate. Includes a read-only advisor mode for second opinions.",
+  "author": { "name": "wilrf" }
+}

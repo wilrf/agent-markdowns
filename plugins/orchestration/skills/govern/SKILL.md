@@ -1,6 +1,7 @@
 ---
 name: govern
-description: Start a fresh Governor session for csa-new — policy, sequencing, and receipt-audit authority over a multi-lane phase. Use when the user says "open a governor session", "/govern", "start CSA gov N", or when a multi-lane phase needs a persistent policy-and-sequencing authority separate from the liaison doing the mechanics.
+description: [ARCHIVED — csa-new only] Start a fresh Governor session for csa-new — policy, sequencing, and receipt-audit authority over a multi-lane phase. Use when the user says "open a governor session", "/govern", "start CSA gov N", or when a multi-lane phase needs a persistent policy-and-sequencing authority separate from the liaison doing the mechanics.
+disable-model-invocation: true
 argument-hint: [optional: phase-handoff path, or a note on what this phase is]
 allowed-tools: Bash(ls:*), Bash(cat:*), Bash(git log:*), Bash(git diff:*), Bash(git show:*), Bash(git status:*), Read, Grep, Glob, Write, Edit, Bash(git add:*), Bash(git commit:*), Task
 user-invocable: true

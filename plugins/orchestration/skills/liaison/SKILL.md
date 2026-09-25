@@ -1,6 +1,7 @@
 ---
 name: liaison
-description: Start a Liaison session for csa-new — the mechanics clerk for one lane of a multi-lane phase (worktrees, build dispatch, gates, commits, PRs). Use when the user says "open a liaison session", "/liaison", "start CSA <mission> pt N", or a governor session hands off a lane brief. Never merges to main — that is Doug's alone.
+description: [ARCHIVED — csa-new only] Start a Liaison session for csa-new — the mechanics clerk for one lane of a multi-lane phase (worktrees, build dispatch, gates, commits, PRs). Use when the user says "open a liaison session", "/liaison", "start CSA <mission> pt N", or a governor session hands off a lane brief. Never merges to main — that is Doug's alone.
+disable-model-invocation: true
 argument-hint: [required: lane brief or handoff-brief path]
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(codex *), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr edit:*), Bash(gh pr comment:*), Bash(gh pr diff:*), Bash(ls:*), Bash(cat:*), Read, Grep, Glob, Write, Edit, Task
 user-invocable: true

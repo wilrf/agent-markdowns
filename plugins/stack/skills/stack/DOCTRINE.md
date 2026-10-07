@@ -83,7 +83,7 @@ Engine + governor + delegate **compose**; they are not a menu.
   the target, build and self-verify until green. If the work can have a gate,
   it runs under engine — not just overnight runs.
 - **Delegate the typing**: inside engine phases the default builder is the
-  cheapest capable frontier model via CLI offload (Codex at xhigh) — engine
+  cheapest capable frontier model via CLI offload (Codex at high for implementation; xhigh for second opinions) — engine
   writes the tight spec, the delegate implements, engine verifies against the
   gate. In-session implementation is the exception that needs a reason.
 - **Multi-lane phases** (plugin: `orchestration`): `govern` opens ABOVE the
@@ -144,7 +144,7 @@ Model routing for every dispatch — pin the model explicitly on every fan-out:
 | ---- | ----------- | ---- |
 | Command | the main session | Orchestrates + governs; never a worker |
 | Senior specialist | Second-smartest (Opus-class, high) | Adversarial + security review, hard debugging, shipping prose |
-| First workhorse | Frontier builder at max effort (Codex/GPT xhigh) | Implements from tight specs |
+| First workhorse | Frontier builder at max effort (Codex/GPT: high (implementation); xhigh for second opinions) | Implements from tight specs |
 | Menial agent | Mid-tier (Sonnet-class) | Wide search, browser driving, mechanical sweeps |
 | Deterministic runner | Small model (Haiku-class) | Known-right-answer tasks + cheap search; output machine-checked |
 

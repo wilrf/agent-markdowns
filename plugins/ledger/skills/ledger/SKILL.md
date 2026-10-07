@@ -6,11 +6,9 @@ user-invocable: true
 
 # Ledger — durable working memory for multi-phase work
 
-Extracted from the engine's context-budgeting discipline so it can run under ANY
-execution mode (engine, liaison lane, codex-delegate orchestration, or plain
-in-session work). The premise: a multi-phase run outlives its context window,
-and auto-compaction is lossy. Engineer for that from the start, not after the
-first amnesia incident.
+This runs under any execution mode: engine, a liaison lane, codex-delegate
+orchestration, or plain in-session work. A multi-phase run outlives its
+context window, so plan for context loss from the start.
 
 ## The prime rule
 
@@ -27,9 +25,9 @@ directory). Sections:
   that proves it.
 - **Phase status** — per phase: `todo` / `done` / `blocked-with-reason`.
 - **Decisions made** — one line each, with the why.
-- **Findings REJECTED with rationale** — the **"do-NOT-re-raise"** list.
-  Prevents re-litigating settled questions after context loss; paste it into
-  any fresh session or subagent prompt.
+- **Findings rejected, with rationale** — the **"do-NOT-re-raise"** list.
+  It stops a fresh session from re-litigating settled questions; paste it
+  into any fresh session or subagent prompt.
 - **Anomalies** — expected X, observed Y, resolved-or-open.
 - **Environment facts** — ports, env names, credentials locations (never
   values), quirks discovered the hard way.
@@ -38,22 +36,15 @@ directory). Sections:
 
 ## Cadence
 
-- **Update BEFORE every commit** — the commit and the ledger move together;
-  a commit whose state isn't in the ledger is a future archaeology project.
-- **Update the instant an anomaly fires** — stop-and-log beats reconstruct-
+- **Update before every commit.** The commit and the ledger move together;
+  a commit whose state isn't in the ledger becomes archaeology later.
+- **Update the instant an anomaly fires.** Logging now beats reconstructing
   later.
-- **Compaction happens at phase boundaries ONLY** — right after commit +
-  ledger update, when there is zero in-flight state. Never mid-edit, never
-  mid-debug. The ledger is what makes the compaction safe. Mechanics: the
-  agent CANNOT invoke `/compact` itself — in interactive sessions, SUGGEST
-  it to the human at the boundary; in autonomous runs, keep the ledger
-  compaction-ready and trust auto-summarization to land on it; headless/
-  SDK drivers CAN send literal `/compact [focus]` between phases (a
-  documented SDK input) — the one place boundary compaction is automatable.
-- **Shape what compaction keeps**: the compactor honors a "Compact
-  Instructions" section in CLAUDE.md — have it always preserve the ledger
-  path, the gate/DONE block, and the do-NOT-re-raise list, so even an
-  unplanned auto-compact lands on the ledger.
+- **Compact at phase boundaries only** — right after commit and ledger
+  update, with no in-flight state. Not mid-edit, not mid-debug; the ledger
+  is what makes compaction safe. In interactive sessions, suggest /compact
+  to the human at the boundary. In autonomous runs, keep the ledger
+  compaction-ready and trust auto-summarization to land on it.
 
 ## Resuming (fresh session, post-compact, or handoff)
 
@@ -75,3 +66,13 @@ Before declaring DONE, run the retro pass over the ledger: promote any trap
 that bit twice, cost a phase, or would bite a fresh session into the
 appropriate playbook/CLAUDE.md. Session-specific noise dies with the task —
 delete or archive the ledger once its lessons are promoted.
+
+## Gotchas
+
+- The agent cannot invoke `/compact` itself. → Suggest it to the human. A
+  headless/SDK driver can send literal `/compact [focus]` between phases (a
+  documented SDK input); that is the one place boundary compaction is
+  automatable.
+- Auto-compaction is lossy and can fire unplanned. → The compactor honors a
+  "Compact Instructions" section in CLAUDE.md. Have it always preserve the
+  ledger path, the gate/DONE block, and the do-NOT-re-raise list.

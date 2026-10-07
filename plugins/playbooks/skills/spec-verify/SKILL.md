@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Spec Verification Playbook
 
-Verify the codebase implements the spec correctly.
+Verify the codebase implements the spec correctly. Run at high effort: effort catches missed edge cases; it does not fix a wrong approach. Done means each status cites a file:line, plus a test or run that shows the behavior where one is possible.
 
 ## Process
 
@@ -14,7 +14,6 @@ For each requirement in the spec:
 1. Locate the implementation in code
 2. Verify behavior matches spec exactly
 3. Check edge cases are handled
-4. Flag any deviations
 
 ## What to Flag
 

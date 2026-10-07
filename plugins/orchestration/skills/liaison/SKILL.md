@@ -29,8 +29,8 @@ changes that.
 
 **`$ARGUMENTS` is required — this session does not start without a
 resolvable brief.** If `$ARGUMENTS` is empty, or does not point at a
-readable lane brief or liaison handoff file, STOP and ask the user for one
-rather than inferring a lane, a branch, or a scope. A liaison launched
+readable lane brief or liaison handoff file, stop and ask the user for one.
+Do not infer a lane, a branch, or a scope. A liaison launched
 without a brief has no authorized scope, branch, lane boundary, acceptance
 criteria, or current state to work from.
 
@@ -40,9 +40,7 @@ criteria, or current state to work from.
    `TEMPLATE-liaison-lane-handoff.md`. This is your "State at handoff" and
    "Immediate queue" — read it before assuming you know where the lane is.
    It also names the current governor's session by its own recorded session
-   name — use that exact name for CCD pings and escalations; never guess it
-   from your own "pt N" number, since governor and liaison numbering are
-   independent sequences.
+   name — use that exact name for CCD pings and escalations (see Gotchas).
 2. **`.claude/docs/ops/governor-operating-model.md`** — your charter (Role
    charters → Liaison), the numbered Policies (P-1–P-8, cite them by number
    when a finding collides with one), the shared dev-deployment fencing rule
@@ -52,14 +50,13 @@ criteria, or current state to work from.
    the merge).
 3. **`CLAUDE.md`** — gates (`pnpm turbo run build lint:check typecheck
    test:ci --concurrency=2` is the required full gate — it matches CI's
-   main/merge-queue command; a PR's own CI run uses a filtered subset, so
-   this is the stricter local bar, not a literal replay of the PR workflow),
+   main/merge-queue command),
    push policy, worktree conventions, the UI-impact classification
    (`pnpm ui:classify` — intent-based: any change, including backend-only
    Convex work, whose purpose is to alter visible dashboard behavior or
    state is UI-impacting), and the `pnpm ui:validate` receipt requirement
    for UI-touching changes (P-5), keyed to the pushed branch HEAD SHA at
-   receipt time, never a future squash-merge SHA.
+   receipt time.
 4. **If this lane touches CI workflows, gates, push infrastructure,
    Playwright auth-state tooling, or Convex read-budget code**, also read
    `.claude/docs/ops/2026-07-04-shared-repo-gate-invariants.md` — CLAUDE.md
@@ -127,16 +124,13 @@ contract item 2, `governor-operating-model.md`).
    `candidateHeadSha` in the handoff/PR body. Every finding gets fixed or
    explicitly overruled with a one-line reason; a finding that collides
    with a spec or an existing pattern is a POLICY-QUESTION to the governor,
-   not something you resolve yourself (P-1). Any new commit changes
-   `candidateHeadSha` and invalidates the review — re-run or re-confirm it
-   against the new head before claiming readiness.
+   not something you resolve yourself (P-1).
 4. **Live-probes before claiming ready** for any pagination-shape,
    page-assembly, cron, or UI-touching change (P-3) — green gates plus
    review is necessary but not sufficient. Define the probe concretely
    before running it: candidate deployment identity, the workload exercised,
    a baseline reading taken the same way, and the minimum change that counts
-   as pass — "trending down over subsequent days" on its own is a
-   post-landing confirmation, not a valid pre-landing receipt.
+   as pass.
 5. **Runs the required full gate command before any push**, against the
    current `candidateHeadSha`. Commits with explicit pathspecs, never
    bundling another lane's dirty files.
@@ -167,10 +161,7 @@ contract item 2, `governor-operating-model.md`).
 
 - One agent at a time on shared resources (port 3000, the dev Convex
   deployment, `main`) — the governor is the scheduler. Worktree-isolated
-  work parallelizes freely for **files**; it does not by itself isolate the
-  shared dev Convex deployment — see "Shared dev-deployment fencing" in the
-  operating model before assuming a parallel lane is safe to run a watcher
-  or a mutating probe in.
+  work parallelizes freely for **files** only (see Gotchas).
 - Round-cap: at most 2 fix-rounds on a single review before parking and
   escalating rather than looping indefinitely.
 - Lane-branch naming: name lane branches with an ordinary prefix
@@ -189,6 +180,25 @@ contract item 2, `governor-operating-model.md`).
   `git push --no-verify`, `restore`, `clean -f`, and never disturbing
   another lane's dirty files via stash/reset/rebase to force a push
   through.
+
+## Gotchas
+
+- Governor and liaison "pt N" numbers are independent sequences → address
+  the governor only by the session name recorded in the brief; never guess
+  it from your own pt number.
+- A PR's own CI run uses a filtered subset of the gate → run the full local
+  gate anyway; it is the stricter bar, not a replay of the PR workflow.
+- A `ui:validate` receipt keyed to a future squash-merge SHA proves nothing
+  → key it to the pushed branch HEAD SHA at receipt time.
+- Any new commit changes `candidateHeadSha` and invalidates the review →
+  re-run or re-confirm the review against the new head before you claim
+  readiness.
+- "Trending down over subsequent days" is a post-landing confirmation, not
+  a pre-landing receipt → define a probe with a same-way baseline and a
+  minimum pass change.
+- A worktree isolates files, not the shared dev Convex deployment → read
+  "Shared dev-deployment fencing" in the operating model before a parallel
+  lane runs a watcher or a mutating probe.
 
 Start by confirming `$ARGUMENTS` resolves to a real brief, read it plus the
 operating model, confirm the worktree/branch state with the governor if this

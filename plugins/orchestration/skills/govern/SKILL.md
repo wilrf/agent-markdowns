@@ -32,11 +32,8 @@ filename suffix:
 !`ls -t .claude/docs/plans/*-phase-handoff.md 2>/dev/null | grep -vi template | head -5 || echo "(none yet — this is the first phase, or no phase handoff has been written)"`
 
 If nothing above matches but `.claude/docs/plans/*handoff*.md` has recent
-files, check each filename before treating it as your bootstrap: a
-`*-liaison-handoff-*.md` file is a single lane's state, not the phase
-ledger, and reading it as a phase handoff will hand you the wrong objective
-and an incomplete queue. Never derive the phase objective from a liaison
-handoff.
+files, check each filename before you treat it as your bootstrap (see
+Gotchas).
 
 Read, in order:
 
@@ -48,9 +45,7 @@ Read, in order:
    manage Codex directly, or execute a merge — the liaison is the mechanics
    clerk. Your own document authorship is docs-only, per the tool scope
    above. You audit liaison claims with same-turn, read-only tool receipts
-   before ruling on them; that discipline IS the role — never re-run a build
-   or gate yourself to "verify" it, ask the liaison to re-run it and show you
-   the output if a re-run is genuinely needed.
+   before ruling on them; that discipline IS the role.
 2. **The most recent PHASE handoff ledger above** (unless the user named a
    specific one, or `$ARGUMENTS` points elsewhere) — what already landed,
    live tree state, open threads, this phase's objective. If none exists,
@@ -102,8 +97,7 @@ only and explicitly does not extend to merge authority.
   hand off the prompt; the liaison session is separately durable, not a
   subagent nested inside this one. The launch prompt must state your own
   session name explicitly (e.g. "CSA gov 1") so the liaison's handoff briefs
-  can address you correctly — never let the liaison infer your identity from
-  its own "pt N" count; the two sequences are independent.
+  can address you correctly (see Gotchas).
 - Receives liaison progress via the session's CCD send-message tool if one
   is available (capability discovery, not a hardcoded assumption — see
   "Communication (CCD)" in the operating model). Treats every nudge as
@@ -141,13 +135,23 @@ only and explicitly does not extend to merge authority.
    context is getting high, per the meter-then-proxy rule in "Session
    lifecycle & rotation"), stop and write the phase-handoff before
    continuing further work.
-4. **Receipt-audit discipline is non-negotiable and is read-only.** Before
-   ruling on a liaison's claim (gates green, review dispositioned, a lane is
-   ready), re-verify at least the claims the ruling turns on by reading the
-   actual receipt, log, diff, or commit — never by re-running the gate or
-   build yourself. A governor that rules on an unverified claim is not
-   governing; a governor that runs a build to "verify" it has stopped being
-   a governor.
+4. **Receipt audit is read-only.** Before ruling on a liaison's claim
+   (gates green, review dispositioned, a lane is ready), re-verify at least
+   the claims the ruling turns on by reading the actual receipt, log, diff,
+   or commit — never by re-running the gate or build yourself. A ruling on an unverified claim governs nothing.
+
+## Gotchas
+
+- A `*-liaison-handoff-*.md` file looks like a bootstrap but holds one
+  lane's state, not the phase ledger. Read as a phase handoff, it gives the
+  wrong objective and an incomplete queue → never derive the phase objective
+  from a liaison handoff.
+- A liaison that infers your identity from its own "pt N" count addresses
+  the wrong session; governor and liaison numbering are independent → put
+  your exact session name in every launch prompt.
+- Re-running a build or gate yourself to "verify" a claim turns the
+  governor into a builder → read the receipt instead; if a re-run is truly
+  needed, ask the liaison to re-run it and show you the output.
 
 Start by reading the three documents above, then tell Doug what you found
 and what the first liaison launch prompt will say before sending it.

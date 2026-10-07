@@ -10,6 +10,8 @@ Forensic, video-driven diagnosis of motion/timing UI bugs — the class a still
 screenshot cannot show. You capture a `.webm`, locate the offending frame, prove the
 cause with DevTools signals recorded on the same clock, fix it, and re-record to verify.
 
+Run this skill at high effort. Effort fixes missed edge cases, not a wrong approach.
+
 Two bundled scripts (in `scripts/`, beside this file) do the mechanical work; your
 judgment does the rest:
 - `scripts/capture-interaction.mjs` — drives Chrome via a steps-JSON DSL and records
@@ -26,14 +28,14 @@ judgment does the rest:
 - If the app needs auth, a Playwright storage-state JSON at `PLAYWRIGHT_STORAGE_STATE`
   (default `e2e/.auth/user.json`).
 
-## Preflight — STOP if any fails
+## Preflight — stop if any check fails
 
 1. Working tree is clean (`git status`). If dirty with unrelated work, stop and report —
    Stage 5 edits code.
 2. You are in a dedicated branch/worktree. If not, create one off the main branch first.
 3. The app is running and reachable at `PLAYWRIGHT_BASE_URL`. If not, ask the user to start it.
-4. If the surface needs auth, the storage state is valid (a capture that lands on
-   `/sign-in` exits `42`). Refresh it the project's normal way. **Do not bypass the auth gate.**
+4. If the surface needs auth, the storage state is valid. Refresh it the project's normal
+   way. **Do not bypass the auth gate.**
 
 ## Stage 1 — Capture
 
@@ -56,14 +58,13 @@ judgment does the rest:
    `snapshotDom` on the element under suspicion.
 2. Run it **headed** (this is the real diagnostic, not a test):
    `node scripts/capture-interaction.mjs <slug>-steps.json`
-3. Confirm `summary.json` has `exitCode: 0` and a `run.webm`. Exit `42` = auth expired →
-   fix auth, do not proceed.
+3. Confirm `summary.json` has `exitCode: 0` and a `run.webm`.
 
 ## Stage 2 — Expectation model
 
 Synthesize the frame-level invariants — "what SHOULD happen" — from three layers,
-**weighting `user hint > PRD/spec doc > component code`** (buggy code must not be allowed
-to define "correct"):
+**weighting `user hint > PRD/spec doc > component code`**. Buggy code must not define
+"correct".
 
 1. Baseline UX intuition — a click-opened popover stays open until an outside click;
    content never flashes empty-then-fills; no layout shift after first paint; focus does
@@ -87,7 +88,8 @@ Write the ordered invariants to `glitch-<slug>/expectations.md`, each tied to an
      "frameRefs": ["path"], "confidence": 0.0 }
    ```
 4. The **earliest `violates:true`** verdict is the offending frame. If none violate, report
-   "could not reproduce / no divergence found" with the clean video — never invent a finding.
+   "could not reproduce / no divergence found" with the clean video. A finding with no
+   violating frame behind it sends the fix loop after a bug that is not there. Never invent a finding.
 
 ## Stage 4 — Diagnose
 
@@ -98,7 +100,8 @@ At the offending `firstViolationMs`, pull time-aligned signals within ±150ms:
 - `trace.zip` (open with `npx playwright show-trace`) — long tasks / paint timing.
 
 State the root cause and **cite the specific signal that proves it**, traced to `file:line`.
-If no signal corroborates the visual anomaly, say so and lower confidence — never guess a cause.
+If no signal corroborates the visual anomaly, say so and lower confidence. Never guess a cause: a cause with no
+signal behind it is a guess, and the fix will target the wrong code.
 
 ## Stage 5 — Close the loop (≤3 attempts)
 
@@ -108,10 +111,16 @@ If no signal corroborates the visual anomaly, say so and lower confidence — ne
    - **Resolved** → write `glitch-<slug>/report.md` (offending frame, what-should-vs-does,
      proven cause, the fix, before/after frame pair) and commit the fix with a focused message.
    - **Not resolved** → refine and retry, bounded to 3 attempts total, then hand back with
-     findings rather than thrashing.
+     findings.
 
 ## Safety rails
 
 Clean tree only; own branch/worktree; one focused commit at the boundary; never auto-push;
-never force-anything. The `run-after.webm` is the visual evidence artifact — strictly better
-than a screenshot.
+never force-anything. The after-capture video
+(`glitch-<slug>-after/run.webm`) is the visual evidence artifact — it shows motion a
+screenshot cannot.
+
+## Gotchas
+
+- A capture that lands on `/sign-in` exits `42` (auth expired) → refresh the storage state
+  the project's normal way, then re-capture. Do not analyze that run.

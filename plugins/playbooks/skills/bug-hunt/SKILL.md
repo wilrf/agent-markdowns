@@ -6,29 +6,23 @@ disable-model-invocation: true
 
 # Bug Hunt Playbook
 
-Deep bug hunting mode. Assume bugs exist—your job is to find them.
+Assume bugs exist. Find all of them, not only the first.
 
 ## Approach
 
-Be thorough, not fast:
-- Exhaustively explore before concluding
-- Check every file that could be relevant
-- Don't stop at the first issue—find them all
-- Check both runtime AND build-time code paths
-- Verify version consistency across package.json, CDNs, and actual usage
+- Check runtime and build-time code paths.
+- Verify version consistency across package.json, CDNs, and actual usage.
+- Run at high effort. Effort catches missed edge cases; it does not fix a wrong approach.
+- Done means each finding has evidence: a file:line plus a snippet, a trace, or a repro. A finding without evidence is a hypothesis; label it so. `/bug-fix` verifies each finding with a failing test before any fix.
 
 ## What to Check
 
-### Security (OWASP Top 10)
-- Injection flaws (SQL, command, XSS)
-- Broken authentication/session management
-- Sensitive data exposure
-- XML external entities (XXE)
-- Broken access control
-- Security misconfiguration
-- Cross-site scripting (XSS)
-- Insecure deserialization
-- Using components with known vulnerabilities
+### Security (OWASP Top 10) — always check
+- Injection (SQL, command, XSS)
+- Broken authentication, session management, or access control
+- Sensitive data exposure; security misconfiguration
+- XML external entities (XXE); insecure deserialization
+- Components with known vulnerabilities
 - Insufficient logging/monitoring
 
 ### Logic Errors
@@ -38,7 +32,6 @@ Be thorough, not fast:
 - Boundary conditions
 - Integer overflow/underflow
 - Regex edge cases (escaped chars, greedy matching, multiline)
-- String splitting that doesn't respect quoted values
 
 ### Concurrency
 - Race conditions
@@ -46,7 +39,6 @@ Be thorough, not fast:
 - Thread safety issues
 - Shared mutable state
 - **File system race conditions** (read-modify-write without locking)
-- **Stale closure captures** in React useCallback/useMemo
 
 ### Resource Management
 - Memory leaks
@@ -54,32 +46,24 @@ Be thorough, not fast:
 - Connection pool exhaustion
 - Unclosed resources
 - **Promise leaks** (stored promises never resolved/rejected on error)
-- **Web Worker crashes** leaving pending callbacks orphaned
 
 ### Error Handling
 - Swallowed exceptions
 - Generic catch blocks
 - Missing error paths
 - Incomplete rollback on failure
-- **Silent failures** returning null without distinguishing "not found" vs "error"
 - JSON.parse without schema validation (type assertion bypasses TypeScript)
 
 ### Async/Worker Patterns
-- **Timeout via Promise.race doesn't cancel underlying operation**
-- Worker onerror not cleaning up pending state
 - Init failure not preventing subsequent calls
-- Status checks captured in closures becoming stale
 - Missing timeout on validation/secondary operations
 
 ### Version & Dependency Issues
-- **CDN version mismatch** with package.json declaration
 - Dynamic require/import without structure validation
 - Build artifacts out of sync with source (manifest files)
 
 ### Parsing & Transform Pipelines
-- Whitespace splitting breaking quoted values
 - Escaped quotes in regex patterns
-- Empty values after split (need filter(Boolean))
 - **Sorting instability** with floating point or equal values
 - Order/numbering schemes that don't handle suffixes (1.4a)
 
@@ -99,7 +83,6 @@ Be thorough, not fast:
 - Broken imports/dependencies
 - Features that look implemented but aren't wired up
 - **Dead parameters** accepted but never used
-- **Timeout patterns that don't actually stop execution**
 
 ## Output Format
 
@@ -122,3 +105,12 @@ End with:
 3. Recommended fix priority order (grouped by file/module)
 4. Patterns observed (systemic issues)
 5. Test coverage status (framework configured? tests exist?)
+
+## Gotchas
+
+- `Promise.race` timeouts do not cancel the underlying operation → check that the work actually stops (abort signal, worker terminate).
+- A CDN script version can differ from the package.json version → compare the CDN URL, the declared version, and the installed version.
+- Closures go stale: React `useCallback`/`useMemo` captures and status checks captured in closures → check dependency arrays and where the value is read.
+- A Web Worker crash leaves pending callbacks orphaned → check that `onerror` rejects and clears all pending state.
+- A function returns `null` for both "not found" and "error" → flag it; callers cannot tell a silent failure from an empty result.
+- Whitespace splitting breaks quoted values and leaves empty strings → check quote handling and `filter(Boolean)`.

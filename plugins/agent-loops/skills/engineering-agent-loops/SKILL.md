@@ -6,19 +6,17 @@ user-invocable: true
 
 # Engineering Agent Loops & Goals — the foundation
 
-This is the **brain** of the agent-loops toolkit. The full operating manual lives next to it:
-
-**`references/agent-loops-playbook.md`** — read it now before designing the loop.
+The full operating manual lives next to this file:
+**`references/agent-loops-playbook.md`**. Read it before you design the loop.
 
 Wherever the manual says **`verify`**, substitute your project's real aggregate gate (the one
 command that chains type-check + lint + tests into a single exit code).
 
-## The four modes (all four ship as skills in the `engine` plugin)
+## The four modes (all ship as skills in the `engine` plugin)
 
-The loop is one engine — produce an artifact → verify it against something that can **fail** →
-adversarially attack it → simplify → iterate to a machine-checkable done. Only four bindings
-change with the work. All four modes ship as skills inside the single `engine` plugin in this
-marketplace; installing it gives you all of them:
+The loop is one engine: produce an artifact → verify it against something that can **fail** →
+attack it adversarially → simplify → iterate to a machine-checkable done. Only four bindings
+change with the work:
 
 | Mode | Skill (in the `engine` plugin) | Artifact | Gate that can fail |
 | ---- | ------------------------------ | -------- | ------------------ |
@@ -27,8 +25,7 @@ marketplace; installing it gives you all of them:
 | **Plan** | `engine-planning` | spec/plan | grounding checks + premortem |
 | **Infra** | `engine-infra` | system state | dry-run diff, parity harness, canary, rehearsed rollback |
 
-This plugin is the foundation they all rest on. The mode skills carry their own station
-template and trigger; they're richer with this playbook installed alongside.
+The mode skills carry their own station template and trigger; this playbook deepens them.
 
 ## What the playbook covers
 

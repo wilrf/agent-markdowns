@@ -6,52 +6,51 @@ user-invocable: true
 
 # User walkthrough — prove the feature in the browser
 
-Green unit tests are NOT this. This skill exists because "code is right but
-the product is broken" is a failure class only a browser can catch: dead
-buttons, unwired state, layout collapse, a form that submits nowhere. The
-feature must be SEEN working, driven the way a user would drive it.
+Green unit tests do not prove this. Some failures exist only in the browser:
+dead buttons, unwired state, layout collapse, a form that submits nowhere.
+You must see the feature work, driven the way a user drives it.
+
+Run this skill at high effort. Effort fixes missed edge cases, not a wrong
+approach.
 
 ## 0 · Setup — know your surface
 
-Most projects have two testable surfaces with DIFFERENT roles. Walk both,
-never confuse them:
+Most projects have two testable surfaces with different roles. Walk both and
+keep them apart:
 
 - **The build surface** (local dev, e.g. `localhost:3000`) — full freedom:
-  drive, mutate, seed, instrument. Fixes are built and gate-verified here
-  first. Playwright / Playwright MCP with the project's storage-state auth.
+  drive, mutate, seed, instrument. Build and gate-verify fixes here first.
+  Use Playwright / Playwright MCP with the project's storage-state auth.
 - **The observe surface** (deployed production, e.g. the project's Vercel
-  URL) — READ-ONLY. Used only to (a) confirm a defect exists for real users
-  before fixing and (b) confirm the fix after it deploys. No mutations, no
-  test data; actions that trigger real AI/API cost sparingly. Prefer the
-  user's own signed-in browser (Claude-in-Chrome) here; never wire test
-  auth against prod.
+  URL) — READ-ONLY. Use it only to (a) confirm a
+  defect exists for real users before you fix it and (b) confirm the fix
+  after it deploys. No mutations, no test data. Trigger real AI/API cost
+  sparingly. Prefer the user's own signed-in browser (Claude-in-Chrome)
+  here. Never wire test auth against prod.
 
-The ledger records which surface every finding and every proof came from —
-a bug repro'd only on dev might be env noise; a fix verified only on dev is
-not user-verified.
+The ledger records which surface every finding and every proof came from.
 
 - Find the running app (dev server, preview URL) or start it with the
-  project's own launch method. Note the base URL + surface in the ledger.
+  project's own launch method. Note the base URL and surface in the ledger.
 - Use the Playwright MCP tools (`browser_navigate`, `browser_snapshot`,
   `browser_click`, `browser_fill_form`, `browser_take_screenshot`, ...) when
-  available; otherwise write a Playwright script. Snapshot > screenshot for
-  asserting text/structure; screenshot for visual evidence.
-- If the feature has auth-gated paths, get to a signed-in state the project's
-  normal way (seeded test user, dev bypass). NEVER type real credentials.
+  available; otherwise write a Playwright script.
+- For auth-gated paths, sign in the project's normal way (seeded test user,
+  dev bypass). Never type real credentials.
 
 ## 1 · Enumerate the workflows
 
-Before touching the browser, list every user workflow the feature touches —
-not just the happy path the implementer had in mind:
+Before you open the browser, list every user workflow the feature touches —
+not only the happy path the implementer had in mind:
 
-- The primary flow(s) the feature was built for, end-to-end (start from
-  where a real user starts, not from the feature's own URL).
+- The primary flow(s) the feature was built for, end-to-end. Start where a
+  real user starts, not at the feature's own URL.
 - Adjacent flows that share state with the feature (the list that shows the
   thing you created; the dashboard count it should bump).
 - Each user role that can reach it, if roles differ.
 
-Write the list to the ledger as a checklist. This list is the test plan;
-walking it is non-negotiable, additions during the run are welcome.
+Write the list to the ledger as a checklist. This list is the test plan:
+walk every item. Add items when the run reveals them.
 
 ## 2 · Walk each workflow
 
@@ -91,7 +90,7 @@ reason:
 - **Invalid input** — wrong types, too-long strings, required fields blank,
   paste of junk: rejected gracefully, with a usable message?
 - **Double-actions** — double-click submit, rapid repeat clicks: one
-  mutation or two? (look at the data, not the UI)
+  mutation or two?
 - **Refresh mid-flow** — reload halfway through: state recovers or resets
   cleanly, no half-written data?
 - **Rapid navigation** — leave mid-action, come back: no stuck spinners,
@@ -101,15 +100,12 @@ reason:
 - **Back button** — after completing the flow: no resubmission, no broken
   state?
 
-Watch the browser console throughout — errors are findings even
-when the UI looks fine.
-
 ## 4 · Report
 
-Everything goes to the ledger, then a short report: per-workflow pass/fail
+Write everything to the ledger, then a short report: per-workflow pass/fail
 table, edge-case battery results, findings with screenshot evidence, and an
 explicit list of anything NOT exercised (the unexercised cells). A finding
-here feeds the fix loop — the walkthrough reruns after fixes until the
+here feeds the fix loop — rerun the walkthrough after fixes until the
 checklist is green.
 
 ## Scope guard
@@ -118,3 +114,16 @@ This is user-level verification of one feature, not a full regression suite.
 Keep it proportional: a small feature is ~10 minutes of driving, not an
 afternoon. For motion/timing defects (flicker, flash, stutter) hand off to
 `diagnose-ui-glitch` — video catches what interaction can't.
+
+## Gotchas
+
+- A bug reproduced only on dev may be env noise → confirm it on the observe
+  surface before you fix it.
+- A fix verified only on dev is not user-verified → confirm it on the
+  observe surface after it deploys.
+- A screenshot cannot assert text or structure → use `browser_snapshot` for
+  assertions; keep screenshots for visual evidence.
+- A double-click can look fine in the UI and still write two records →
+  check the data, not the UI.
+- The UI can look fine while the console logs errors → watch the browser
+  console throughout; every error is a finding.

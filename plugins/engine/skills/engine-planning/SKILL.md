@@ -15,14 +15,18 @@ The full method is in the **agent-loops playbook** (`agent-loops` plugin →
 
 What "a gate that can fail" means when the artifact is a plan:
 
-1. **Grounding checks.** Every step must touch files/APIs/tables that *actually exist* —
-   verify the load-bearing assumptions against the real tree, don't build the plan on a guess.
-   A plan that references a function that isn't there fails its gate.
-2. **A premortem panel.** Adversarially ask "how is this plan wrong?" — missing migration,
-   unhandled concurrency, a dependency that isn't there yet, a phase that can't be verified.
-3. **Every phase names the gate it closes against.** A phase whose "done" you can't state as a
-   check is a phase that will spawn a vibe-loop downstream. No un-gated phases.
+1. **Grounding checks.** Every step must touch files/APIs/tables that actually exist. Verify
+   the load-bearing assumptions against the real tree. A plan that references a missing
+   function fails its gate.
+2. **A premortem panel.** Ask adversarially, at high effort, "how is this plan wrong?" —
+   a missing migration, unhandled concurrency, a dependency that does not exist yet, a phase
+   that cannot be verified.
+3. **Every phase names the gate it closes against.** No un-gated phases.
 
-Simplify = **fewest phases**. The plan emitted here is what build mode (the `engine` skill)
-consumes — so write the done-conditions machine-checkable now; the engine will only be as
-honest as the plan it's handed.
+Simplify = **fewest phases**. The engine consumes this plan, so write the done-conditions
+machine-checkable now. The engine is only as honest as the plan it gets.
+
+## Gotchas
+
+- A phase whose "done" you cannot state as a check spawns a vibe-loop downstream → rewrite
+  it until its done-condition is a check.

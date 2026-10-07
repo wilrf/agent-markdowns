@@ -6,11 +6,11 @@ disable-model-invocation: true
 
 # Spec Doc Review Playbook
 
-Review the spec doc to prevent problems before any code is written.
+Review the spec doc to prevent problems before any code is written. Done means every requirement was checked against each category below, and each issue names the requirement it comes from.
 
 ## Reasoning Approach
 
-For each requirement, think step-by-step:
+For each requirement, ask:
 1. Is this requirement clear and unambiguous?
 2. Is it implementable as described?
 3. What could go wrong?

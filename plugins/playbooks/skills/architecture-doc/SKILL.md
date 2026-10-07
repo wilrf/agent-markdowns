@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Architecture Documentation Playbook
 
-Generate comprehensive architecture documentation for the codebase.
+Generate architecture documentation for the codebase. Done means every component, path, and compliance row cites a file path that exists in the repo.
 
 ## Process
 
@@ -23,9 +23,7 @@ Explore systematically:
 
 ### Step 3: Document
 
-## Output Format
-
-Save to `ARCHITECTURE.md`:
+Save to `ARCHITECTURE.md` in this format:
 
 ```markdown
 # Architecture Overview
